@@ -25,10 +25,10 @@ export interface IInstanceSelector<_RESULT> {
 }
 
 export enum SelectorType {
-    NORMAL,
-    PARAMETER,
-    MIX,
-    RESTRICT,
+    NORMAL = "normal selector",
+    PARAMETER = "parameter selector",
+    MIX = "mix selector",
+    RESTRICT = "restrict selector",
 }
 
 /**

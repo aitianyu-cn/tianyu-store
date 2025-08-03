@@ -7,6 +7,7 @@
     "DISPATCHING_HANDLER_WITH_UNKNOWN_RESULT": "[Tianyu Store] action handler dispathine cause an unknown error.",
     "GET_NEW_STATE_LOST_OBJECT": "[Tianyu Store] object {0} is not found from new state.",
     "DO_SELECTING_FAILED": "[Tianyu Store] store selector exeuction failed.",
+    "SELECTOR_NOT_SUPPORTED_FOR_LISTEN_OR_SUBSCRIBE": "[Tianyu Store] selector type {0} is not supported in store listener or subscribe, please use selector excludes 'restrict selector' and 'mix selector'",
 
     "INSTANCE_ID_NOT_VALID": "[Tianyu Store] store instance id {0} is not valid.",
     "CREATE_INSTANCE_PARENT_NOT_INIT": "[Tianyu Store] store instance id {0} is not valid since trying to create a child instance under an uninited instance.",

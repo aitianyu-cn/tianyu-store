@@ -16,6 +16,7 @@ import {
 import { IStoreExecution, IStoreManager } from "src/types/Store";
 import { TransactionType } from "src/types/Transaction";
 import { getStoreTypeMatchedInstanceId } from "./InstanceProcessor";
+import { MessageBundle } from "src/infra/Message";
 
 export function doSelecting<RESULT>(
     manager: IStoreManager,
@@ -53,6 +54,9 @@ export function doSelectingWithState<RESULT>(
         const selectorImpl = manager.getSelector(selector.selector, !!selector.template, selector.instanceId);
         manager.select(selector);
         const type = selectorImpl.type;
+        if (type !== SelectorType.NORMAL && type !== SelectorType.PARAMETER) {
+            throw MessageBundle.getText("SELECTOR_NOT_SUPPORTED_FOR_LISTEN_OR_SUBSCRIBE", type.toString());
+        }
 
         const getter = (selectorImpl as SelectorProvider<any, RESULT> | ParameterSelectorProvider<any, any, RESULT>)
             .getter;
