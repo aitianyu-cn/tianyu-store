@@ -4,10 +4,11 @@
     "ACTION_VIRTUAL_NO_HANDLER": "[Tianyu Store] handler of virtual action should not be executed.",
     "ACTION_VIRTUAL_NO_REDUCER": "[Tianyu Store] could not get state from virtual action reducer.",
     "ACTION_VIRTUAL_NO_EXTERNAL_OPERATOR": "[Tianyu Store] external object entry is not indicated in virtual action.",
-    "DISPATCHING_HANDLER_WITH_UNKNOWN_RESULT": "[Tianyu Store] action handler dispathine cause an unknown error.",
+    "DISPATCHING_HANDLER_WITH_UNKNOWN_RESULT": "[Tianyu Store] action handler dispathing cause an unknown error.",
     "GET_NEW_STATE_LOST_OBJECT": "[Tianyu Store] object {0} is not found from new state.",
     "DO_SELECTING_FAILED": "[Tianyu Store] store selector exeuction failed.",
-    "SELECTOR_NOT_SUPPORTED_FOR_LISTEN_OR_SUBSCRIBE": "[Tianyu Store] selector type {0} is not supported in store listener or subscribe, please use selector excludes 'restrict selector' and 'mix selector'",
+
+    "SELECTOR_NOT_SUPPORTED_FOR_LISTEN_OR_SUBSCRIBE": "[Tianyu Store] selector type '{0}' is not supported in store listener or subscribe, please use selector excludes 'restrict selector' and 'mix selector'.",
 
     "INSTANCE_ID_NOT_VALID": "[Tianyu Store] store instance id {0} is not valid.",
     "CREATE_INSTANCE_PARENT_NOT_INIT": "[Tianyu Store] store instance id {0} is not valid since trying to create a child instance under an uninited instance.",
@@ -28,7 +29,7 @@
     "DISPATCHING_REDO_UNDO_NOT_ATOM": "[Tianyu Store] action {0} operation should be automiced.",
     "DISPATCHING_SYSTEM_LIFECYCLE_NOT_ATOM": "[Tianyu Store] store entity operation: {0} should be automiced.",
     "DISPATCHING_ACTION_INSTANCE_NOT_MATCH": "[Tianyu Store] could not support different store type instance execution, using instance \"{1}\" store type to execute \"{2}\" action belongs to \"{0}\" store type.",
-    "DISPATCHING_INSTANCE_ID_NOT_VALID": "[Tianyu Store] {0} action",
+    "DISPATCHING_INSTANCE_ID_NOT_VALID": "[Tianyu Store] Action {0} could not be executed by using the invalid instance id {1}.",
 
     "RUNNING_STORE_TYPE_INSTANCE_NOT_MATCH": "[Tianyu Store] execute on instance ({0}) failed, due to store entity type could not found.",
 

@@ -1,3 +1,37 @@
 {
-    "TIANYU_STORE_CURRENT_LANGUAGE": "zh_cn"
+    "TIANYU_STORE_CURRENT_LANGUAGE": "zh_cn",
+    "SELECTOR_VIRTUAL_NO_RANNABLE": "[Tianyu Store] 无法在Tianyu Store中执行一个虚拟的Selector",
+    "ACTION_VIRTUAL_NO_HANDLER": "[Tianyu Store] 无法在Tianyu Store中执行一个虚拟的Action",
+    "ACTION_VIRTUAL_NO_REDUCER": "[Tianyu Store] Tianyu Store无法从虚拟的Action Reducer中获取新的状态",
+    "ACTION_VIRTUAL_NO_EXTERNAL_OPERATOR": "[Tianyu Store] Tianyu Store无法从虚拟Action中定位External Object",
+    "DISPATCHING_HANDLER_WITH_UNKNOWN_RESULT": "[Tianyu Store] Tianyu Store在执行Action时发生未知错误",
+    "GET_NEW_STATE_LOST_OBJECT": "[Tianyu Store] Tianyu Store无法再新的状态中访问对象 {0}",
+    "DO_SELECTING_FAILED": "[Tianyu Store] Tianyu Store执行Selector时发生错误",
+
+    "SELECTOR_NOT_SUPPORTED_FOR_LISTEN_OR_SUBSCRIBE": "[Tianyu Store] Tianyu Store不支持'{0}'类型的Selector作为Store状态监听触发器，请选择'normal'和'parameter'类型的Selector",
+
+    "INSTANCE_ID_NOT_VALID": "[Tianyu Store] ID {0} 在当前Store中不是有效的实例ID",
+    "CREATE_INSTANCE_PARENT_NOT_INIT": "[Tianyu Store] 在尝试创建ID {0}实例时发生错误，无法在未初始化的实例下创建子实例",
+
+    "STORE_ACTION_NOT_FOUND": "[Tianyu Store] 无法执行Action，未找到 {0}",
+    "STORE_SELECTOR_NOT_FOUND": "[Tianyu Store] 无法执行Selector，未找到 {0}",
+    "STORE_CREATE_ENTITY_DUP": "[Tianyu Store] 无法创建Store，实例 {0} - {1} 已存在",
+    "STORE_SHOULD_NOT_REGISTER_SYSTEM_ENTITY": "[Tianyu Store] Tianyu Store核心存在异常：当前无法注册核心组件",
+    "STORE_ENTITY_NOT_EXIST": "[Tianyu Store] 尝试访问实例 {0} 失败，可能该实例已被删除或还没有被初始化",
+    "STORE_EVENT_LISTENER_TRIGGER_FAILED": "[Tianyu Store] 触发Store状态监听器失败：{0} （ID： {1}，Selector：\"{2}\"）",
+    "STORE_EVENT_SUBSCRIBE_TRIGGER_FAILED": "[Tianyu Store] 触发Store状态订阅失败：{0} （ID： {1}，Selector：\"{2}\"）",
+
+    "STORE_INSTANCE_USE_DELETED": "[Tianyu Store] 正在访问已经移除的实例（Store类型 {0} - ID {1}）",
+    "STORE_INSTANCE_EXTRERNAL_MANAGER_NOT_FOUND": "[Tianyu Store] 从实例{0}中无法找到External Object",
+    "STORE_INSTANCE_NOT_EXIST": "[Tianyu Store] Store实例 {0} 不存在",
+
+    "DISPATCHING_ACTIONS_DIFFERENT_ANCESTOR": "[Tianyu Store] 无法通过给定的ID执行当前Action，存在错误的实例类型映射 {0} - {1}.",
+    "DISPATCHING_REDO_UNDO_NOT_ATOM": "[Tianyu Store] Redo和Undo Action {0} 无法和其他Action一起执行",
+    "DISPATCHING_SYSTEM_LIFECYCLE_NOT_ATOM": "[Tianyu Store] Create和Destroy Action在Tianyu Store中，无法和其他Action一起执行",
+    "DISPATCHING_ACTION_INSTANCE_NOT_MATCH": "[Tianyu Store] 无法支持不同存储类型实例的执行，使用属于 '{0}' 存储类型的 '{1}' 实例来执行Action '{2}'",
+    "DISPATCHING_INSTANCE_ID_NOT_VALID": "[Tianyu Store] 正在使用无效的ID {1} 执行Action {0}",
+
+    "RUNNING_STORE_TYPE_INSTANCE_NOT_MATCH": "[Tianyu Store] 未找到存储实体类型，在实例（{0}）上执行失败",
+
+    "TRANSACTION_ERROR_RECORDING_UNKNOWN_ERROR": "[Tianyu Store] 无效的实例 ID {1} 用于执行Action {0}"
 }
