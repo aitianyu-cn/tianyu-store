@@ -9,6 +9,8 @@ import { createBatchAction } from "src/utils/BatchActionUtils";
 import {
     TestPageStateInterface,
     TestPageStateStoreType,
+    TestTestStateInterface,
+    TestTestStateStoreType,
     TestUserStateInterface,
     TestUserStateStoreType,
     USER_CONNECTION_EXTERNAL_OBJ,
@@ -108,24 +110,131 @@ describe("aitianyu-cn.node-module.tianyu-store.store.processing.Dispatching", ()
 
             expect(
                 TianyuStore.selecte(TestUserStateInterface.selector.getUserOperations(userEntityInstanceId)),
-            ).toEqual(["Home", "Setting", "Help"]);
+            ).toEqual(["Home", "Setting", "Help", "Theme", "Language"]);
+        });
+
+        it("test for getting user status", () => {
+            const status = TianyuStore.selecte(TestUserStateInterface.selector.getUserStatus(userEntityInstanceId));
+            expect(status instanceof Missing).toBeFalsy();
+
+            expect(
+                (
+                    status as {
+                        user: string;
+                        logon: boolean;
+                        token: string;
+                    }
+                ).user,
+            ).toEqual("admin");
+            expect(
+                (
+                    status as {
+                        user: string;
+                        logon: boolean;
+                        token: string;
+                    }
+                ).logon,
+            ).toBeTruthy();
+        });
+
+        it("test for getting user info", () => {
+            const info = TianyuStore.selecte(TestUserStateInterface.selector.getUserInfo(userEntityInstanceId));
+            expect(info instanceof Missing).toBeFalsy();
+
+            expect(
+                (
+                    info as {
+                        operations: string[];
+                        user: string;
+                        logon: boolean;
+                        token: string;
+                    }
+                ).operations,
+            ).toEqual(["Home", "Setting", "Help", "Theme", "Language"]);
+        });
+
+        it("test for store type is not matched in instance id", async () => {
+            jest.spyOn(TianyuStore as any, "error");
+
+            await TianyuStore.dispatch(
+                TestUserStateInterface.action.userLogonAction(pageEntityInstanceId, { user: "admin" }),
+            );
+
+            expect((TianyuStore as any).error).toHaveBeenCalled();
         });
 
         describe("redo undo test", () => {
-            it("change page", async () => {
+            const testEntityInstanceId1 = generateInstanceId(ancestorInstanceId, TestTestStateStoreType);
+            const testEntityInstanceId2 = generateInstanceId(ancestorInstanceId, TestTestStateStoreType);
+
+            it("change page and create instance", async () => {
+                expect(
+                    TianyuStore.selecteWithThrow(
+                        TianyuStoreEntityExpose.selector.getInstanceExist(
+                            testEntityInstanceId1.ancestor,
+                            testEntityInstanceId1,
+                        ),
+                    ),
+                ).toBeFalsy();
+                expect(
+                    TianyuStore.selecteWithThrow(
+                        TianyuStoreEntityExpose.selector.getInstanceExist(
+                            testEntityInstanceId2.ancestor,
+                            testEntityInstanceId2,
+                        ),
+                    ),
+                ).toBeFalsy();
+
                 await TianyuStore.dispatch(
                     TestPageStateInterface.action.pageIndexChangeAction(pageEntityInstanceId, { page: 2 }),
                 );
+                await TianyuStore.dispatch(TestTestStateInterface.core.creator(testEntityInstanceId2));
                 expect(
                     TianyuStore.selecte(TestPageStateInterface.selector.getCurrentPage(pageEntityInstanceId)),
                 ).toEqual(2);
+                expect(
+                    TianyuStore.selecteWithThrow(
+                        TianyuStoreEntityExpose.selector.getInstanceExist(
+                            testEntityInstanceId1.ancestor,
+                            testEntityInstanceId1,
+                        ),
+                    ),
+                ).toBeFalsy();
+                expect(
+                    TianyuStore.selecteWithThrow(
+                        TianyuStoreEntityExpose.selector.getInstanceExist(
+                            testEntityInstanceId2.ancestor,
+                            testEntityInstanceId2,
+                        ),
+                    ),
+                ).toBeTruthy();
 
                 await TianyuStore.dispatch(
-                    TestPageStateInterface.action.pageIndexChangeAction(pageEntityInstanceId, { page: 3 }),
+                    createBatchAction([
+                        TestPageStateInterface.action.pageIndexChangeAction(pageEntityInstanceId, { page: 3 }),
+                        TestTestStateInterface.core.creator(testEntityInstanceId1),
+                        TestTestStateInterface.core.destroy(testEntityInstanceId2),
+                    ]),
                 );
                 expect(
                     TianyuStore.selecte(TestPageStateInterface.selector.getCurrentPage(pageEntityInstanceId)),
                 ).toEqual(3);
+                expect(
+                    TianyuStore.selecteWithThrow(
+                        TianyuStoreEntityExpose.selector.getInstanceExist(
+                            testEntityInstanceId1.ancestor,
+                            testEntityInstanceId1,
+                        ),
+                    ),
+                ).toBeTruthy();
+                expect(
+                    TianyuStore.selecteWithThrow(
+                        TianyuStoreEntityExpose.selector.getInstanceExist(
+                            testEntityInstanceId2.ancestor,
+                            testEntityInstanceId2,
+                        ),
+                    ),
+                ).toBeFalsy();
             });
 
             it("undo", async () => {
@@ -150,6 +259,23 @@ describe("aitianyu-cn.node-module.tianyu-store.store.processing.Dispatching", ()
                 expect(
                     TianyuStore.selecte(TianyuStoreRedoUndoExpose.stack.getUndoAvailable(ancestorInstanceId)),
                 ).toBeTruthy();
+
+                expect(
+                    TianyuStore.selecteWithThrow(
+                        TianyuStoreEntityExpose.selector.getInstanceExist(
+                            testEntityInstanceId1.ancestor,
+                            testEntityInstanceId1,
+                        ),
+                    ),
+                ).toBeFalsy();
+                expect(
+                    TianyuStore.selecteWithThrow(
+                        TianyuStoreEntityExpose.selector.getInstanceExist(
+                            testEntityInstanceId2.ancestor,
+                            testEntityInstanceId2,
+                        ),
+                    ),
+                ).toBeTruthy();
             });
 
             it("redo", async () => {
@@ -171,6 +297,23 @@ describe("aitianyu-cn.node-module.tianyu-store.store.processing.Dispatching", ()
                 expect(
                     TianyuStore.selecte(TianyuStoreRedoUndoExpose.stack.getUndoAvailable(ancestorInstanceId)),
                 ).toBeTruthy();
+
+                expect(
+                    TianyuStore.selecteWithThrow(
+                        TianyuStoreEntityExpose.selector.getInstanceExist(
+                            testEntityInstanceId1.ancestor,
+                            testEntityInstanceId1,
+                        ),
+                    ),
+                ).toBeTruthy();
+                expect(
+                    TianyuStore.selecteWithThrow(
+                        TianyuStoreEntityExpose.selector.getInstanceExist(
+                            testEntityInstanceId2.ancestor,
+                            testEntityInstanceId2,
+                        ),
+                    ),
+                ).toBeFalsy();
             });
 
             it("clean stack", async () => {

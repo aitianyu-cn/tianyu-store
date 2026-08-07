@@ -3,7 +3,7 @@
 import { ActionType, IInstanceAction } from "src/types/Action";
 import { ExternalObjectHandleFunction } from "src/types/ExternalObject";
 import { InstanceId } from "src/types/InstanceId";
-import { IInstanceSelector } from "src/types/Selector";
+import { IInstanceSelector, SelectorResult } from "src/types/Selector";
 import {
     StoreActionHandle,
     StoreHandleType,
@@ -17,7 +17,7 @@ export function* doActionWithActioName(
     instanceId: InstanceId,
     params?: any,
 ): Generator<StoreActionHandle, StoreActionHandle, StoreActionHandle> {
-    const action: IInstanceAction = {
+    const action: IInstanceAction<any> = {
         // action id is not provided here
         id: "",
         // generate action name with the reg
@@ -38,7 +38,9 @@ export function* doActionWithActioName(
  * @param action to be generated action instance
  * @returns return a generator for action
  */
-export function* doAction(action: IInstanceAction): Generator<StoreActionHandle, StoreActionHandle, StoreActionHandle> {
+export function* doAction(
+    action: IInstanceAction<any>,
+): Generator<StoreActionHandle, StoreActionHandle, StoreActionHandle> {
     return yield { type: StoreHandleType.ACTION, action };
 }
 
@@ -46,13 +48,27 @@ export function* doAction(action: IInstanceAction): Generator<StoreActionHandle,
  * To create a selector generator to execute.
  * This API only valid in Action Handler to support recursive dispatching
  *
- * @param action to be generated selector instance
+ * @param selector to be generated selector instance
  * @returns return a generator for selector
  */
 export function* doSelector<RESULT>(
     selector: IInstanceSelector<RESULT>,
+): Generator<StoreSelectorHandle<RESULT>, SelectorResult<RESULT>, SelectorResult<RESULT>> {
+    return yield { type: StoreHandleType.SELECTOR, selector, shouldThrow: false };
+}
+
+/**
+ * To create a selector generator to execute.
+ * This API only valid in Action Handler to support recursive dispatching
+ * An error will be thrown if the selector has error
+ *
+ * @param selector to be generated selector instance
+ * @returns return a generator for selector
+ */
+export function* doSelectorWithThrow<RESULT>(
+    selector: IInstanceSelector<RESULT>,
 ): Generator<StoreSelectorHandle<RESULT>, RESULT, RESULT> {
-    return yield { type: StoreHandleType.SELECTOR, selector };
+    return yield { type: StoreHandleType.SELECTOR, selector, shouldThrow: true };
 }
 
 /**

@@ -1,19 +1,31 @@
 /** @format */
 
 import { getDifference, mergeDiff } from "src/common/DiffHelper";
-import { DifferenceChangeType, IDifferences } from "src/store/storage/interface/RedoUndoStack";
 import { IStoreState, STORE_STATE_INSTANCE, STORE_STATE_SYSTEM } from "src/store/storage/interface/StoreState";
+import { DifferenceChangeType, IDifferences } from "src/types/RedoUndoStack";
 
 describe("aitianyu-cn.node-module.tianyu-store.common.DiffHelper", () => {
     describe("getDifference", () => {
         it("create new instance", () => {
             const oldState: IStoreState = {
-                [STORE_STATE_SYSTEM]: {},
+                [STORE_STATE_SYSTEM]: {
+                    config: { redoUndo: true },
+                    instanceMap: {
+                        parentMap: {},
+                        childrenMap: {},
+                    },
+                },
                 [STORE_STATE_INSTANCE]: {},
             };
 
             const newState: IStoreState = {
-                [STORE_STATE_SYSTEM]: {},
+                [STORE_STATE_SYSTEM]: {
+                    config: { redoUndo: true },
+                    instanceMap: {
+                        parentMap: {},
+                        childrenMap: {},
+                    },
+                },
                 [STORE_STATE_INSTANCE]: {
                     store: {
                         instance: {},
@@ -30,7 +42,13 @@ describe("aitianyu-cn.node-module.tianyu-store.common.DiffHelper", () => {
 
         it("delete old instance", () => {
             const oldState: IStoreState = {
-                [STORE_STATE_SYSTEM]: {},
+                [STORE_STATE_SYSTEM]: {
+                    config: { redoUndo: true },
+                    instanceMap: {
+                        parentMap: {},
+                        childrenMap: {},
+                    },
+                },
                 [STORE_STATE_INSTANCE]: {
                     store: {
                         instance: {},
@@ -39,7 +57,13 @@ describe("aitianyu-cn.node-module.tianyu-store.common.DiffHelper", () => {
             };
 
             const newState: IStoreState = {
-                [STORE_STATE_SYSTEM]: {},
+                [STORE_STATE_SYSTEM]: {
+                    config: { redoUndo: true },
+                    instanceMap: {
+                        parentMap: {},
+                        childrenMap: {},
+                    },
+                },
                 [STORE_STATE_INSTANCE]: {},
             };
 
@@ -52,7 +76,13 @@ describe("aitianyu-cn.node-module.tianyu-store.common.DiffHelper", () => {
 
         it("change instance", () => {
             const oldState: IStoreState = {
-                [STORE_STATE_SYSTEM]: {},
+                [STORE_STATE_SYSTEM]: {
+                    config: { redoUndo: true },
+                    instanceMap: {
+                        parentMap: {},
+                        childrenMap: {},
+                    },
+                },
                 [STORE_STATE_INSTANCE]: {
                     store: {
                         instance: {
@@ -63,7 +93,13 @@ describe("aitianyu-cn.node-module.tianyu-store.common.DiffHelper", () => {
             };
 
             const newState: IStoreState = {
-                [STORE_STATE_SYSTEM]: {},
+                [STORE_STATE_SYSTEM]: {
+                    config: { redoUndo: true },
+                    instanceMap: {
+                        parentMap: {},
+                        childrenMap: {},
+                    },
+                },
                 [STORE_STATE_INSTANCE]: {
                     store: {
                         instance: {
@@ -84,7 +120,13 @@ describe("aitianyu-cn.node-module.tianyu-store.common.DiffHelper", () => {
     describe("mergeDiff", () => {
         it("merge diff normal", () => {
             const state: IStoreState = {
-                [STORE_STATE_SYSTEM]: {},
+                [STORE_STATE_SYSTEM]: {
+                    config: { redoUndo: true },
+                    instanceMap: {
+                        parentMap: {},
+                        childrenMap: {},
+                    },
+                },
                 [STORE_STATE_INSTANCE]: {
                     store: {
                         instance: {
@@ -136,7 +178,13 @@ describe("aitianyu-cn.node-module.tianyu-store.common.DiffHelper", () => {
 
         it("merge diff reverse", () => {
             const state: IStoreState = {
-                [STORE_STATE_SYSTEM]: {},
+                [STORE_STATE_SYSTEM]: {
+                    config: { redoUndo: true },
+                    instanceMap: {
+                        parentMap: {},
+                        childrenMap: {},
+                    },
+                },
                 [STORE_STATE_INSTANCE]: {
                     store: {
                         instance: {
@@ -188,7 +236,13 @@ describe("aitianyu-cn.node-module.tianyu-store.common.DiffHelper", () => {
 
         it("merge diff if store type missed", () => {
             const state: IStoreState = {
-                [STORE_STATE_SYSTEM]: {},
+                [STORE_STATE_SYSTEM]: {
+                    config: { redoUndo: true },
+                    instanceMap: {
+                        parentMap: {},
+                        childrenMap: {},
+                    },
+                },
                 [STORE_STATE_INSTANCE]: {},
             };
             const diff: IDifferences = {

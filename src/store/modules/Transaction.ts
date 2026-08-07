@@ -28,7 +28,7 @@ export function formatTransactionType(type: TransactionType): string {
 export class TransactionImpl implements ITransaction, ITransactionInternal {
     private readonly storeId: string;
 
-    private dispatchedActions: TransactionOperationRecord<IInstanceAction>[];
+    private dispatchedActions: TransactionOperationRecord<IInstanceAction<any>>[];
     private selections: TransactionOperationRecord<IInstanceSelector<any>>[];
     private errors: TransactionErrorRecord[];
 
@@ -40,7 +40,7 @@ export class TransactionImpl implements ITransaction, ITransactionInternal {
         this.errors = [];
     }
 
-    getDispatched(): TransactionOperationRecord<IInstanceAction>[] {
+    getDispatched(): TransactionOperationRecord<IInstanceAction<any>>[] {
         return this.dispatchedActions.concat();
     }
     cleanDispatch(): void {
@@ -59,8 +59,8 @@ export class TransactionImpl implements ITransaction, ITransactionInternal {
         this.errors = [];
     }
 
-    dispatched(actions: IInstanceAction[]): TransactionOperationRecord<IInstanceAction> {
-        const actionRec: TransactionOperationRecord<IInstanceAction> = {
+    dispatched(actions: IInstanceAction<any>[]): TransactionOperationRecord<IInstanceAction<any>> {
+        const actionRec: TransactionOperationRecord<IInstanceAction<any>> = {
             id: guid(),
             time: new Date(Date.now()),
             operations: actions,

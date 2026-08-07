@@ -1,10 +1,23 @@
 /**@format */
 
-import { selectorCreator, parameterSelectorCreator } from "src/common/SelectorHelper";
+import {
+    selectorCreator,
+    parameterSelectorCreator,
+    mixingSelectorCreator,
+    restrictSelectorCreator,
+} from "src/common/SelectorHelper";
 import { MessageBundle } from "src/infra/Message";
 import { ExternalObjectHandleFunction } from "src/types/ExternalObject";
 import { IterableType } from "src/types/Model";
-import { RawSelector, SelectorProvider, RawParameterSelector, ParameterSelectorProvider } from "src/types/Selector";
+import {
+    RawSelector,
+    SelectorProvider,
+    RawParameterSelector,
+    ParameterSelectorProvider,
+    MixSelectorProvider,
+    RestrictSelectorProvider,
+    SPB,
+} from "src/types/Selector";
 
 /** Tianyu Store Selector Create Factor */
 export class SelectorFactor {
@@ -51,6 +64,43 @@ export class SelectorFactor {
     }
 
     /**
+     * To create a new constant selector to return a value out of store state
+     *
+     * @template RETURN_TYPE type of selector return value
+     * @template PARAMETER_TYPE type of selector parameter (default parameter is void type)
+     *
+     * @param rawSelector selector raw process function
+     * @returns return a new selector
+     */
+    public static makeConstantSelector<RETURN_TYPE, PARAMETER_TYPE = void>(
+        rawSelector: RawParameterSelector<{}, PARAMETER_TYPE, RETURN_TYPE, void>,
+    ): ParameterSelectorProvider<{}, PARAMETER_TYPE, RETURN_TYPE> {
+        return parameterSelectorCreator<{}, PARAMETER_TYPE, RETURN_TYPE>(rawSelector);
+    }
+
+    /** To create a new mixing selector */
+    /* istanbul ignore next */
+    public static makeMixingSelector = mixingSelectorCreator;
+
+    /**
+     * To create a new restrict selector
+     *
+     * @template RETURN_TYPE type of selector return value
+     * @template PARAMETER_TYPE type of selector parameter (default parameter is void type)
+     * @template RTo type of first selector generated result and the second selector parameter
+     *
+     * @param restrictSelector a selector to generate an intermediate state as the target selector parameter from input parameter
+     * @param targetSelector a selector receive an intermediate state as parameter and return a result
+     * @returns return a new selector
+     */
+    public static makeRestrictSelector<RETURN_TYPE, PARAMETER_TYPE = void, RTo = any>(
+        restrictSelector: SPB<RTo, PARAMETER_TYPE>,
+        targetSelector: ParameterSelectorProvider<any, RTo, RETURN_TYPE>,
+    ): RestrictSelectorProvider<PARAMETER_TYPE, RETURN_TYPE> {
+        return restrictSelectorCreator(restrictSelector, targetSelector);
+    }
+
+    /**
      * To create a virtual selector with no parameteres
      *
      * @template STATE the type of state
@@ -84,5 +134,43 @@ export class SelectorFactor {
         ): RETURN_TYPE {
             throw new Error(MessageBundle.getText("SELECTOR_VIRTUAL_NO_RANNABLE"));
         });
+    }
+
+    /**
+     * To create a virtual constant selector
+     *
+     * @template RETURN_TYPE type of selector return value
+     * @template PARAMETER_TYPE type of selector parameter (default parameter is void type)
+     *
+     * @returns return a new virtual selector
+     */
+    public static makeVirtualConstantSelector<RETURN_TYPE, PARAMETER_TYPE = void>(): ParameterSelectorProvider<
+        {},
+        PARAMETER_TYPE,
+        RETURN_TYPE
+    > {
+        return parameterSelectorCreator<{}, PARAMETER_TYPE, RETURN_TYPE>(function (
+            _state: {},
+            _params: PARAMETER_TYPE,
+        ): RETURN_TYPE {
+            throw new Error(MessageBundle.getText("SELECTOR_VIRTUAL_NO_RANNABLE"));
+        });
+    }
+
+    public static makeVirtualMxingSelector<PARAMETER_TYPE, RETURN_TYPE>(): MixSelectorProvider<
+        PARAMETER_TYPE,
+        RETURN_TYPE
+    > {
+        return mixingSelectorCreator([], function (_selectors, _params) {
+            throw new Error(MessageBundle.getText("SELECTOR_VIRTUAL_NO_RANNABLE"));
+        });
+    }
+
+    public static makeVirtualRestrictSelector<
+        RETURN_TYPE,
+        PARAMETER_TYPE = void,
+        _RTo = any,
+    >(): RestrictSelectorProvider<PARAMETER_TYPE, RETURN_TYPE> {
+        return restrictSelectorCreator(SelectorFactor.makeVirtualSelector(), SelectorFactor.makeVirtualSelector());
     }
 }

@@ -22,7 +22,7 @@ import { ReducerFunction } from "./Reducer";
  *
  * Action Instance is generated from a IAction instance provider
  */
-export interface IInstanceAction {
+export interface IInstanceAction<PARAMETER_TYPE> {
     /** Action Id */
     id: string;
     /** Action Full Name */
@@ -32,9 +32,11 @@ export interface IInstanceAction {
     /** Target Store Instance Id */
     instanceId: InstanceId;
     /** Additional Parameter */
-    params: any;
+    params: PARAMETER_TYPE;
     /** Action Type */
     actionType: ActionType;
+    /** Indicates the store operator is a template or fact */
+    template?: boolean;
 }
 
 /**
@@ -42,7 +44,7 @@ export interface IInstanceAction {
  *
  * View Action Instance is generated from a ViewAction instance provider
  */
-export interface IInstanceViewAction extends IInstanceAction {
+export interface IInstanceViewAction<PARAMETER_TYPE> extends IInstanceAction<PARAMETER_TYPE> {
     /** View Instance Id */
     viewInstanceId?: InstanceId;
     /** Indicates view action transaction is not support */
@@ -103,7 +105,7 @@ export interface IActionProvider<STATE extends IterableType, PARAMETER_TYPE, RET
      *
      * @returns return a packeged action instance
      */
-    (instanceId: InstanceId, param: PARAMETER_TYPE): IInstanceAction;
+    (instanceId: InstanceId, param: PARAMETER_TYPE): IInstanceAction<PARAMETER_TYPE>;
 
     /** Action Handler Executor */
     handler: ActionHandlerFunction<PARAMETER_TYPE, RETURN_TYPE>;
@@ -280,7 +282,7 @@ export interface ViewActionProvider<STATE extends IterableType, PARAMETER_TYPE, 
      *
      * @returns return a packeged view action instance
      */
-    (instanceId: InstanceId, param: PARAMETER_TYPE, viewInstanceId: InstanceId): IInstanceViewAction;
+    (instanceId: InstanceId, param: PARAMETER_TYPE, viewInstanceId: InstanceId): IInstanceViewAction<PARAMETER_TYPE>;
 }
 
 /**
@@ -290,5 +292,5 @@ export interface ViewActionProvider<STATE extends IterableType, PARAMETER_TYPE, 
  */
 export interface IBatchAction {
     /** Action Instances Array */
-    actions: IInstanceAction[];
+    actions: IInstanceAction<any>[];
 }

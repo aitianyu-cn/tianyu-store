@@ -1,6 +1,5 @@
 /**@format */
 
-import { IDifferences } from "src/store/storage/interface/RedoUndoStack";
 import { IStoreState } from "src/store/storage/interface/StoreState";
 import { ActionType, IActionProvider, IBatchAction, IInstanceAction, IInstanceViewAction } from "./Action";
 import { IExternalObjectRegister } from "./ExternalObject";
@@ -9,9 +8,10 @@ import { InstanceId } from "./InstanceId";
 import { ITianyuStoreInterface, ITianyuStoreInterfaceMap } from "./Interface";
 import { IInstanceListener, StoreEventTriggerCallback } from "./Listener";
 import { IterableType } from "./Model";
+import { IDifferences } from "./RedoUndoStack";
 import { IInstanceSelector, ISelectorProviderBase, SelectorProvider, SelectorResult } from "./Selector";
 import { Unsubscribe } from "./Subscribe";
-import { CallbackActionT, MapOfType } from "@aitianyu.cn/types";
+import { CallbackActionT, MapOfString, MapOfStrings, MapOfType } from "@aitianyu.cn/types";
 import { TransactionErrorRecord, TransactionOperationRecord, TransactionType } from "./Transaction";
 
 /** this is for internal using */
@@ -22,7 +22,7 @@ export interface IStoreExecution {
     getRecentChanges(): IDifferences;
     getHistories(): { histroy: IDifferences[]; index: number };
 
-    applyChanges(): void;
+    applyChanges(): IDifferences;
     discardChanges(): void;
     pushStateChange(
         storeType: string,
@@ -31,15 +31,16 @@ export interface IStoreExecution {
         newState: any,
         notRedoUndo: boolean,
     ): void;
+    pushDiffChange(diff: IDifferences): void;
 
-    validateActionInstance(action: IInstanceAction): void;
+    validateActionInstance(action: IInstanceAction<any>): void;
 }
 
 /** this is for internal using */
 export interface IStoreManager {
     id: string;
-    getAction(id: string): IActionProvider<any, any, any>;
-    getSelector(id: string): ISelectorProviderBase<any>;
+    getAction(id: string, template: boolean, instanceId: InstanceId): IActionProvider<any, any, any>;
+    getSelector(id: string, template: boolean, instanceId: InstanceId): ISelectorProviderBase<any, any>;
 
     createEntity(instanceId: InstanceId, state: IStoreState): void;
     destroyEntity(instanceId: InstanceId): void;
@@ -70,8 +71,26 @@ export type StoreConfiguration = {
     friendlyName?: string;
 };
 
+export interface IStoreSystemInstanceMap extends IterableType {
+    parentMap: MapOfType<string | null>;
+    childrenMap: MapOfStrings;
+}
+
 /** Tianyu Store Instance Entity creation configuration */
-export interface IStoreInstanceCreateConfig extends IterableType {
+export interface IStoreInstanceSystemState extends IterableType {
+    /**
+     * Indicates the instance can do redo or undo operation
+     *
+     * If this is false, redo undo stack will not be generated
+     */
+    config: {
+        redoUndo?: boolean;
+    };
+    instanceMap: IStoreSystemInstanceMap;
+}
+
+/** Tianyu Store Instance Entity creation configuration */
+export interface IStoreInstanceCreatorConfig extends IterableType {
     /**
      * Indicates the instance can do redo or undo operation
      *
@@ -154,6 +173,15 @@ export interface IStore {
     selecte<RESULT>(selector: IInstanceSelector<RESULT>): SelectorResult<RESULT>;
 
     /**
+     * To select a state value, to throw an error when get state failed
+     *
+     * @param selector the selector instance
+     *
+     * @returns return selected value
+     */
+    selecteWithThrow<RESULT>(selector: IInstanceSelector<RESULT>): RESULT;
+
+    /**
      * To dispatch an action or actions.
      * This dispatch is a transaction executor.
      *
@@ -164,7 +192,7 @@ export interface IStore {
      * WARNING: PLEASE DO NOT EXECUTE A VIEW ACTION DURING THIS DISPATCH EXECUTION,
      * BECAUSE IF THE UNDO, REDO IS APPLIED, STORE STATE MIGHT NOT CHANGED CORRECTLY.
      */
-    dispatch(action: IInstanceAction | IBatchAction): Promise<void>;
+    dispatch(action: IInstanceAction<any> | IBatchAction): Promise<void>;
     /**
      * To dispatch a ui action or actions.
      * This dispatch is not a transaction executor.
@@ -173,7 +201,7 @@ export interface IStore {
      *
      * @returns return a promise to wait actions done
      */
-    dispatchForView(action: IInstanceViewAction | IBatchAction): void;
+    dispatchForView(action: IInstanceViewAction<any> | IBatchAction): void;
     /** Destroy store */
     destroy(): void;
 }
@@ -186,12 +214,12 @@ export interface IStoreDevAPI {
 
     getState(): MapOfType<IStoreState>;
     getHistories(): { histroy: IDifferences[]; index: number };
-    getAllDispatchs(): TransactionOperationRecord<IInstanceAction>[];
+    getAllDispatchs(): TransactionOperationRecord<IInstanceAction<any>>[];
     getAllSelectors(): TransactionOperationRecord<IInstanceSelector<any>>[];
     getAllErrors(): TransactionErrorRecord[];
 
     setOnSelector(callback?: CallbackActionT<TransactionOperationRecord<IInstanceSelector<any>>>): void;
-    setOnDispatch(callback?: CallbackActionT<TransactionOperationRecord<IInstanceAction>>): void;
+    setOnDispatch(callback?: CallbackActionT<TransactionOperationRecord<IInstanceAction<any>>>): void;
     setOnError(callback?: CallbackActionT<TransactionErrorRecord>): void;
     setOnChangeApplied(callback?: CallbackActionT<IDifferences>): void;
 }

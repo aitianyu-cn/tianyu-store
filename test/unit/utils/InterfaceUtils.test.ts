@@ -2,7 +2,7 @@
 
 import { ActionFactor } from "src/store/ActionFactor";
 import { SelectorFactor } from "src/store/SelectorFactor";
-import { registerExpose, registerInterface } from "src/utils/InterfaceUtils";
+import { registerExpose, registerInterface, registerTemplate } from "src/utils/InterfaceUtils";
 
 describe("aitianyu-cn.node-module.tianyu-store.utils.InterfaceUtils", () => {
     describe("registerExpose", () => {
@@ -93,5 +93,28 @@ describe("aitianyu-cn.node-module.tianyu-store.utils.InterfaceUtils", () => {
         expect(keys.includes("store.core.destroy")).toBeTruthy();
         expect(keys.includes("store.common.getter.get")).toBeTruthy();
         expect(keys.includes("store.common.setter.set")).toBeTruthy();
+    });
+
+    it("registerTemplate", () => {
+        const storeTemplate = {
+            common: {
+                getter: {
+                    get: SelectorFactor.makeSelector(function (state) {
+                        return true;
+                    }),
+                },
+                setter: {
+                    set: ActionFactor.makeVirtualAction(),
+                },
+            },
+            unused: undefined,
+        };
+
+        registerTemplate(storeTemplate);
+
+        expect(storeTemplate.common.getter.get.info.fullName).toEqual("common.getter.get");
+        expect(storeTemplate.common.getter.get.info.template).toBeTruthy();
+        expect(storeTemplate.common.setter.set.info.fullName).toEqual("common.setter.set");
+        expect(storeTemplate.common.setter.set.info.template).toBeTruthy();
     });
 });

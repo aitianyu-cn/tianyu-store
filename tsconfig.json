@@ -1,6 +1,6 @@
 {
     "include": ["src", "test", "demo/website"],
-    "exclude": [],
+    "exclude": ["index.ts"],
     "compilerOptions": {
         "sourceMap": true,
         "composite": true,
@@ -23,7 +23,6 @@
         "outDir": "./build",
         "paths": {
             "src/*": ["src/*"],
-            "tianyu-store": ["src/index.ts"],
             "tianyu-store/*": ["src/*"],
             "web/*": ["demo/website/*"]
         }

@@ -1,6 +1,6 @@
 {
     "name": "@aitianyu.cn/tianyu-store",
-    "version": "0.2.3",
+    "version": "1.0.0-beta.1",
     "description": "tianyu storage for nodejs.",
     "main": "./dist/lib/src/index.js",
     "types": "./dist/types/src/index.d.ts",
@@ -42,7 +42,7 @@
     "homepage": "https://github.com/aitianyu-cn/tianyu-store#readme",
     "devDependencies": {
         "@aitianyu.cn/client-base": "^0.0.1",
-        "@aitianyu.cn/tianyu-shell": "^0.1.2",
+        "@aitianyu.cn/tianyu-shell": "^0.1.6",
         "@babel/core": "^7.24.6",
         "@babel/preset-env": "^7.24.6",
         "@babel/preset-react": "^7.24.6",

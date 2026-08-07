@@ -1,6 +1,7 @@
 /** @format */
 
 import { guid } from "@aitianyu.cn/types";
+import { IDifferences, DifferenceChangeType } from "src/types/RedoUndoStack";
 import { MessageBundle } from "src/infra/Message";
 import { generateInstanceId } from "src/InstanceId";
 import { createStore, generateNewStoreInstance } from "src/Store";
@@ -8,7 +9,6 @@ import { StoreImpl } from "src/store/impl/StoreImpl";
 import { StoreInstanceImpl } from "src/store/impl/StoreInstanceImpl";
 import { formatTransactionType } from "src/store/modules/Transaction";
 import { SelectorFactor } from "src/store/SelectorFactor";
-import { DifferenceChangeType, IDifferences } from "src/store/storage/interface/RedoUndoStack";
 import { STORE_STATE_SYSTEM, STORE_STATE_INSTANCE } from "src/store/storage/interface/StoreState";
 import { ActionType, IInstanceAction, IInstanceViewAction } from "src/types/Action";
 import { TIANYU_STORE_INSTANCE_BASE_ENTITY_STORE_TYPE } from "src/types/Defs";
@@ -16,7 +16,6 @@ import { InstanceId } from "src/types/InstanceId";
 import { ITianyuStoreInterfaceMap } from "src/types/Interface";
 import { IInstanceListener } from "src/types/Listener";
 import { Missing } from "src/types/Model";
-import { IStoreDevAPI, IStoreExecution } from "src/types/Store";
 import { ITransaction, TransactionType } from "src/types/Transaction";
 import { createBatchAction } from "src/utils/BatchActionUtils";
 import { TestUserStateInterface } from "test/unit/content/DispatchingTestContent";
@@ -34,7 +33,13 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
 
         // create entity normal case
         storeInternal.createEntity(baseInstanceId, {
-            [STORE_STATE_SYSTEM]: {},
+            [STORE_STATE_SYSTEM]: {
+                config: { redoUndo: true },
+                instanceMap: {
+                    parentMap: {},
+                    childrenMap: {},
+                },
+            },
             [STORE_STATE_INSTANCE]: {},
         });
         expect(
@@ -88,7 +93,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
             });
 
             it("pushStateChange", () => {
-                const action: IInstanceAction = {
+                const action: IInstanceAction<any> = {
                     id: "",
                     action: "",
                     storeType: "",
@@ -107,8 +112,14 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
                 }).not.toThrow();
             });
 
+            it("pushStateChange", () => {
+                expect(() => {
+                    storeInternal.pushDiffChange({});
+                }).not.toThrow();
+            });
+
             it("validateActionInstance", () => {
-                const action: IInstanceAction = {
+                const action: IInstanceAction<any> = {
                     id: "",
                     action: "",
                     storeType: "",
@@ -131,26 +142,60 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
         describe("getAction", () => {
             it("action is not defined", () => {
                 expect(() => {
-                    storeInternal.getAction("test.unDefined");
+                    storeInternal.getAction("test.unDefined", false, generateInstanceId("", ""));
                 }).toThrow(MessageBundle.getText("STORE_ACTION_NOT_FOUND", "test.unDefined"));
             });
 
             it("action is defined", () => {
-                const action = storeInternal.getAction(TestUserStateInterface.action.userLogonAction.info.fullName);
+                const action = storeInternal.getAction(
+                    TestUserStateInterface.action.userLogonAction.info.fullName,
+                    false,
+                    generateInstanceId("", ""),
+                );
                 expect(action.info.name).toEqual("userLogonAction");
+            });
+
+            it("action is template", () => {
+                const instanceId = generateInstanceId(baseInstanceId, "test", "");
+                const action = storeInternal.getAction("action.userLogonAction", true, instanceId);
+                expect(action.info.name).toEqual("userLogonAction");
+            });
+
+            it("action is template and could not found", () => {
+                const instanceId = generateInstanceId(baseInstanceId, "test1", "");
+                expect(() => {
+                    storeInternal.getAction("action.userLogonAction", true, instanceId);
+                }).toThrow(MessageBundle.getText("STORE_ACTION_NOT_FOUND", "action.userLogonAction"));
             });
         });
 
         describe("getSelector", () => {
             it("selector is not defined", () => {
                 expect(() => {
-                    storeInternal.getSelector("test.unDefined");
+                    storeInternal.getSelector("test.unDefined", false, generateInstanceId("", ""));
                 }).toThrow(MessageBundle.getText("STORE_SELECTOR_NOT_FOUND", "test.unDefined"));
             });
 
             it("selector is defined", () => {
-                const selector = storeInternal.getSelector(TestUserStateInterface.selector.getUser.info.fullName);
+                const selector = storeInternal.getSelector(
+                    TestUserStateInterface.selector.getUser.info.fullName,
+                    false,
+                    generateInstanceId("", ""),
+                );
                 expect(selector.info.name).toEqual("getUser");
+            });
+
+            it("selector is template", () => {
+                const instanceId = generateInstanceId(baseInstanceId, "test", "");
+                const selector = storeInternal.getSelector("selector.getUser", true, instanceId);
+                expect(selector.info.name).toEqual("getUser");
+            });
+
+            it("selector is template and could not found", () => {
+                const instanceId = generateInstanceId(baseInstanceId, "test1", "");
+                expect(() => {
+                    storeInternal.getSelector("selector.getUser", true, instanceId);
+                }).toThrow(MessageBundle.getText("STORE_SELECTOR_NOT_FOUND", "selector.getUser"));
             });
         });
 
@@ -158,7 +203,13 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
             it("create duplicate entity", () => {
                 expect(() => {
                     storeInternal.createEntity(baseInstanceId, {
-                        [STORE_STATE_SYSTEM]: {},
+                        [STORE_STATE_SYSTEM]: {
+                            config: { redoUndo: true },
+                            instanceMap: {
+                                parentMap: {},
+                                childrenMap: {},
+                            },
+                        },
                         [STORE_STATE_INSTANCE]: {},
                     });
                 }).toThrow(MessageBundle.getText("STORE_CREATE_ENTITY_DUP", baseInstanceId.entity, baseInstanceId.id));
@@ -169,7 +220,13 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
 
                 instancesPool.push(newInstanceId);
                 storeInternal.createEntity(newInstanceId, {
-                    [STORE_STATE_SYSTEM]: {},
+                    [STORE_STATE_SYSTEM]: {
+                        config: { redoUndo: true },
+                        instanceMap: {
+                            parentMap: {},
+                            childrenMap: {},
+                        },
+                    },
                     [STORE_STATE_INSTANCE]: {},
                 });
                 expect(
@@ -187,7 +244,13 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
 
                     instancesPool.push(newInstanceId);
                     storeInternal.createEntity(newInstanceId, {
-                        [STORE_STATE_SYSTEM]: {},
+                        [STORE_STATE_SYSTEM]: {
+                            config: { redoUndo: true },
+                            instanceMap: {
+                                parentMap: {},
+                                childrenMap: {},
+                            },
+                        },
                         [STORE_STATE_INSTANCE]: {},
                     });
                     expect(
@@ -419,9 +482,8 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
             const newInstanceId = generateNewStoreInstance();
             const selectorInstance = TestUserStateInterface.selector.getUser(newInstanceId);
 
-            expect(() => {
-                store.selecte(selectorInstance);
-            }).toThrow(MessageBundle.getText("STORE_ENTITY_NOT_EXIST", newInstanceId.entity));
+            const result = store.selecte(selectorInstance);
+            expect(result instanceof Missing).toBeTruthy();
         });
 
         it("do selecting", () => {
@@ -430,6 +492,26 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
 
             jest.spyOn(Processsing, "doSelecting").mockReturnValue(123);
             const selectResult = store.selecte(selectorInstance);
+            expect(selectResult).toBe(123);
+        });
+    });
+
+    describe("selecteWithThrow", () => {
+        it("entity not exist", () => {
+            const newInstanceId = generateNewStoreInstance();
+            const selectorInstance = TestUserStateInterface.selector.getUser(newInstanceId);
+
+            expect(() => {
+                store.selecteWithThrow(selectorInstance);
+            }).toThrow(MessageBundle.getText("STORE_ENTITY_NOT_EXIST", newInstanceId.entity));
+        });
+
+        it("do selecting", () => {
+            const Processsing = require("src/store/processing/Selecting");
+            const selectorInstance = TestUserStateInterface.selector.getUser(baseInstanceId);
+
+            jest.spyOn(Processsing, "doSelectingWithThrow").mockReturnValue(123);
+            const selectResult = store.selecteWithThrow(selectorInstance);
             expect(selectResult).toBe(123);
         });
     });
@@ -455,7 +537,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
             const action = {
                 ...TestUserStateInterface.action.userLifecycleCreateAction(baseInstanceId),
                 transaction: false,
-            } as IInstanceViewAction;
+            } as IInstanceViewAction<any>;
             store.dispatchForView(action);
             expect((store as any).dispatchInternal).toHaveBeenCalledWith([action], true);
         });
@@ -469,7 +551,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
 
     describe("dispatchInternal", () => {
         const Processsing = require("src/store/processing/Dispatching");
-        const dispatchingSpyOn = jest.spyOn(Processsing, "dispatching");
+        let dispatchingSpyOn: any;
 
         beforeEach(() => {
             jest.spyOn(store as any, "fireListeners").mockImplementation(async () => {
@@ -481,6 +563,8 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
 
             jest.spyOn(storeInternal, "applyChanges");
             jest.spyOn(storeInternal, "discardChanges");
+
+            dispatchingSpyOn = jest.spyOn(Processsing, "dispatching");
 
             ((store as any)["transaction"] as unknown as ITransaction).cleanDispatch();
             ((store as any)["transaction"] as unknown as ITransaction).cleanError();
@@ -551,7 +635,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
 
     describe("fireListeners", () => {
         const Processsing = require("src/store/processing/Selecting");
-        const selectingSpyOn = jest.spyOn(Processsing, "doSelectingWithState");
+        let selectingSpyOn: any;
 
         const instanceId = generateInstanceId(baseInstanceId, "test", "instance");
 
@@ -559,7 +643,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
             id: guid(),
             selector: {
                 id: "",
-                selector: "test.selector",
+                selector: "test.selector.getUser",
                 storeType: "",
                 instanceId: instanceId,
                 params: undefined,
@@ -585,8 +669,8 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
 
         beforeEach(() => {
             jest.spyOn((store as any)["transaction"], "error");
-
             jest.spyOn(listener, "listener");
+            selectingSpyOn = jest.spyOn(Processsing, "doSelectingWithState");
         });
 
         it("entity is not valid, not to fire", (done) => {
@@ -769,7 +853,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
 
     describe("fireSubscribes", () => {
         const Processsing = require("src/store/processing/Selecting");
-        const selectingSpyOn = jest.spyOn(Processsing, "doSelectingWithState");
+        let selectingSpyOn: any;
 
         const instanceId = generateInstanceId(baseInstanceId, "test", "instance");
         const selectorProvider = SelectorFactor.makeSelector<any, any>(function (state) {
@@ -802,6 +886,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreImpl", () => {
 
         beforeEach(() => {
             jest.spyOn((store as any)["transaction"], "error");
+            selectingSpyOn = jest.spyOn(Processsing, "doSelectingWithState");
             isCalled = false;
         });
 

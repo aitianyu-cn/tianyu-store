@@ -1,7 +1,7 @@
 /** @format */
 
+import { DifferenceChangeType, IDifferences } from "src/types/RedoUndoStack";
 import { RedoUndoStackImpl } from "src/store/storage/RedoUndoStackImpl";
-import { DifferenceChangeType, IDifferences } from "src/store/storage/interface/RedoUndoStack";
 
 describe("aitianyu-cn.node-module.tianyu-store.store.storage.RedoUndoStackImpl", () => {
     const redoUndoStack = new RedoUndoStackImpl();

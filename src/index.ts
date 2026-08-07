@@ -7,10 +7,17 @@ export * from "./types/ExternalObject";
 export * from "./types/InstanceId";
 export * from "./types/Interface";
 export * from "./types/Listener";
+export * from "./types/MixSelector";
 export * from "./types/Model";
+export * from "./types/RedoUndoStack";
 export * from "./types/Reducer";
 export * from "./types/Selector";
-export { type StoreConfiguration, type IStoreInstanceCreateConfig, type IStore } from "./types/Store";
+export {
+    type StoreConfiguration,
+    type IStoreInstanceSystemState as IStoreInstanceCreateConfig,
+    type IStore,
+    type IStoreDevAPI,
+} from "./types/Store";
 export * from "./types/StoreHandler";
 export * from "./types/Subscribe";
 export {
@@ -77,9 +84,11 @@ export namespace StoreUtils {
     export namespace Handler {
         export import doAction = HandlerUtilsImport.doAction;
         export import doSelector = HandlerUtilsImport.doSelector;
+        export import doSelectorWithThrow = HandlerUtilsImport.doSelectorWithThrow;
         export import doReadExternal = HandlerUtilsImport.doReadExternal;
     }
 
     export import registerExpose = InterfaceUtilsImport.registerExpose;
+    export import registerTemplate = InterfaceUtilsImport.registerTemplate;
     export import createBatchAction = BatchActionUtilsImport.createBatchAction;
 }

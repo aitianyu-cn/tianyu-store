@@ -24,6 +24,7 @@ module.exports = {
     ],
     clearMocks: true,
     resetMocks: true,
+    restoreMocks: true,
     coverageDirectory: "test/__report__/coverage",
     coveragePathIgnorePatterns: ["<rootDir>/test/unit/content"],
     moduleNameMapper: {

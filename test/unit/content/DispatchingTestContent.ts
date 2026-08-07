@@ -16,14 +16,21 @@ import { DestroyPageStateActionCreator } from "./dispatching-test/action/creator
 import { DestroyUserStateActionCreator } from "./dispatching-test/action/creator/UserStateActionCreator";
 import { getCurrentPage } from "./dispatching-test/selector/PageStateSelector";
 import {
+    getCommonOperations,
     getConnectToken,
     getUser,
+    getUserInfo,
     getUserOperations,
+    getUserSpecifiedOperations,
+    getUserStatus,
     isUserLogon,
 } from "./dispatching-test/selector/UserStateSelector";
 import { ITestUserState } from "./DispatchingTestContent";
 import { ITestPageState } from "./DispatchingTestContent";
 import { ITianyuStoreInterface } from "src/types/Interface";
+import { CreateTestStateAction, DestroyTestStateAction } from "./dispatching-test/action/TestStateAction";
+import { GetTestStateIndex } from "./dispatching-test/selector/TestStateSelector";
+import { ITestTestState } from "./dispatching-test/Types";
 
 export {
     type ITestUserState,
@@ -52,6 +59,10 @@ export const TestUserStateInterface = {
         getUser,
         getConnectToken,
         getUserOperations,
+        getUserStatus,
+        getUserInfo,
+        getUserSpecifiedOperations,
+        getCommonOperations,
     },
 };
 
@@ -68,8 +79,20 @@ export const TestPageStateInterface = {
     },
 };
 
+export const TestTestStateInterface = {
+    core: {
+        creator: CreateTestStateAction,
+        destroy: DestroyTestStateAction,
+    },
+    selector: {
+        getIndex: GetTestStateIndex,
+    },
+};
+
 export const TestUserStateStoreType = "user-state";
 export const TestPageStateStoreType = "page-state";
+export const TestTestStateStoreType = "test-state";
 
 TestUserStateInterface as ITianyuStoreInterface<ITestUserState>;
 TestPageStateInterface as ITianyuStoreInterface<ITestPageState>;
+TestTestStateInterface as ITianyuStoreInterface<ITestTestState>;

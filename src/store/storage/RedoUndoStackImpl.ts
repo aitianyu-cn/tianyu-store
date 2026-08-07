@@ -1,6 +1,7 @@
 /** @format */
 
-import { IDifferences, IRedoUndoStack } from "./interface/RedoUndoStack";
+import { IDifferences } from "src/types/RedoUndoStack";
+import { IRedoUndoStack } from "./interface/RedoUndoStack";
 
 export class RedoUndoStackImpl implements IRedoUndoStack {
     private readonly history: IDifferences[];
@@ -30,7 +31,7 @@ export class RedoUndoStackImpl implements IRedoUndoStack {
         if (this.current) {
             this.previous.push(this.current);
         }
-        this.current = diff;
+        this.current = Object.freeze(diff);
     }
     public doRedo(): IDifferences | undefined {
         if (!this.canRedo) {

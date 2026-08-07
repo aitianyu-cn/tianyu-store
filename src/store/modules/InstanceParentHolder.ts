@@ -3,6 +3,7 @@
 import { InstanceId } from "src/types/InstanceId";
 import { InstanceIdImpl } from "../impl/InstanceIdImpl";
 import { MessageBundle } from "src/infra/Message";
+import { IStoreSystemInstanceMap } from "src/types/Store";
 
 interface IRemovedInstanceCache {
     // It is the parent of removed first instance
@@ -13,15 +14,9 @@ interface IRemovedInstanceCache {
 }
 
 export class InstanceParentHolder {
-    private parentMap: Map<string, string | null>;
-    private childrenMap: Map<string, string[]>;
-
     private removed: IRemovedInstanceCache;
 
     public constructor() {
-        this.parentMap = new Map<string, string | null>();
-        this.childrenMap = new Map<string, string[]>();
-
         this.removed = {
             root: "",
             parent: "",
@@ -29,17 +24,17 @@ export class InstanceParentHolder {
         };
     }
 
-    public createInstance(instanceId: InstanceId): void {
+    public createInstance(instanceId: InstanceId, instanceMap: IStoreSystemInstanceMap): void {
         const parent = instanceId.parent;
 
         const instanceIdString = instanceId.toString();
         if (InstanceIdImpl.isAncestor(parent)) {
             // parent is ancestor, raw instance should be root node
-            this.parentMap.set(instanceIdString, null);
+            instanceMap.parentMap[instanceIdString] = null;
         } else {
             // should check parent
             const parentInstanceString = parent.toString();
-            const childrenList = this.childrenMap.get(parentInstanceString);
+            const childrenList = instanceMap.childrenMap[parentInstanceString];
             if (!childrenList) {
                 throw new Error(MessageBundle.getText("CREATE_INSTANCE_PARENT_NOT_INIT", instanceIdString));
             }
@@ -47,20 +42,20 @@ export class InstanceParentHolder {
             childrenList.push(instanceIdString);
 
             // set parent relations
-            this.parentMap.set(instanceIdString, parentInstanceString);
+            instanceMap.parentMap[instanceIdString] = parentInstanceString;
         }
 
         // always set child list
-        this.childrenMap.set(instanceIdString, []);
+        instanceMap.childrenMap[instanceIdString] = [];
     }
 
-    public applyChanges(): void {
+    public applyChanges(instanceMap: IStoreSystemInstanceMap): void {
         for (const item of this.removed.instances) {
-            this.childrenMap.delete(item);
-            this.parentMap.delete(item);
+            instanceMap.childrenMap[item] !== undefined && delete instanceMap.childrenMap[item];
+            instanceMap.parentMap[item] !== undefined && delete instanceMap.parentMap[item];
         }
 
-        const rootChildren = this.childrenMap.get(this.removed.root);
+        const rootChildren = instanceMap.childrenMap[this.removed.root];
         if (rootChildren) {
             rootChildren.splice(rootChildren.indexOf(this.removed.parent), 1);
         }
@@ -80,10 +75,10 @@ export class InstanceParentHolder {
         };
     }
 
-    public removeInstance(instanceId: string): string[] {
-        const parentInstanceIdString = this.parentMap.get(instanceId) || "";
+    public removeInstance(instanceId: string, instanceMap: IStoreSystemInstanceMap): string[] {
+        const parentInstanceIdString = instanceMap.parentMap[instanceId] || "";
 
-        const removedChildren = [instanceId, ...this.removeChild(instanceId)];
+        const removedChildren = [instanceId, ...this.removeChild(instanceId, instanceMap)];
 
         this.removed = {
             root: parentInstanceIdString,
@@ -94,13 +89,13 @@ export class InstanceParentHolder {
         return removedChildren;
     }
 
-    private removeChild(instanceId: string): string[] {
+    private removeChild(instanceId: string, instanceMap: IStoreSystemInstanceMap): string[] {
         const instances: string[] = [];
 
-        const childrens = this.childrenMap.get(instanceId) || [];
+        const childrens = instanceMap.childrenMap[instanceId] || [];
         for (const child of childrens) {
             // remove all children
-            const removedChildren = this.removeChild(child);
+            const removedChildren = this.removeChild(child, instanceMap);
 
             instances.push(child);
             instances.push(...removedChildren);

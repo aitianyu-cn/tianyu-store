@@ -1,8 +1,8 @@
 /** @format */
 
 import { ArrayHelper, ObjectHelper } from "@aitianyu.cn/types";
-import { IDifferences, DifferenceChangeType } from "src/store/storage/interface/RedoUndoStack";
 import { IStoreState, STORE_STATE_INSTANCE } from "src/store/storage/interface/StoreState";
+import { DifferenceChangeType, IDifferences } from "src/types/RedoUndoStack";
 
 export function getDifference(pre: IStoreState, next: IStoreState): IDifferences {
     const diffs: IDifferences = {};
@@ -66,7 +66,12 @@ export function getDifference(pre: IStoreState, next: IStoreState): IDifferences
     return diffs;
 }
 
-export function mergeDiff(state: IStoreState, diff: IDifferences, reverse?: boolean): IStoreState {
+export function mergeDiff(
+    state: IStoreState,
+    diff: IDifferences,
+    reverse?: boolean,
+    isRedoUndo?: boolean,
+): IStoreState {
     const newState = ObjectHelper.clone(state) as IStoreState;
 
     for (const storeType of Object.keys(diff)) {
@@ -84,10 +89,12 @@ export function mergeDiff(state: IStoreState, diff: IDifferences, reverse?: bool
 
                 // if normal create, set the new state as state
                 // if delete, set the old state as state
-                newState[STORE_STATE_INSTANCE][storeType] = {
-                    ...(newState[STORE_STATE_INSTANCE][storeType] || {}),
-                    [instanceId]: diffItem.type === DifferenceChangeType.Create ? diffItem.new : diffItem.old,
-                };
+                if (!isRedoUndo) {
+                    newState[STORE_STATE_INSTANCE][storeType] = {
+                        ...(newState[STORE_STATE_INSTANCE][storeType] || {}),
+                        [instanceId]: diffItem.type === DifferenceChangeType.Create ? diffItem.new : diffItem.old,
+                    };
+                }
             } else if (
                 (!reverse && diffItem.type === DifferenceChangeType.Delete) ||
                 (reverse && diffItem.type === DifferenceChangeType.Create)
@@ -96,7 +103,7 @@ export function mergeDiff(state: IStoreState, diff: IDifferences, reverse?: bool
                 // in reverse mode and the change type is create
                 // to do the delete
 
-                if (newState[STORE_STATE_INSTANCE][storeType][instanceId]) {
+                if (!isRedoUndo && newState[STORE_STATE_INSTANCE][storeType][instanceId]) {
                     delete newState[STORE_STATE_INSTANCE][storeType][instanceId];
                 }
             } else {

@@ -1,6 +1,5 @@
 /** @format */
 
-import { generateInstanceId } from "src/InstanceId";
 import { storeRedoActionCreatorImpl, storeUndoActionCreatorImpl } from "src/store/storage/RedoUndoActionImpl";
 import { ActionType } from "src/types/Action";
 

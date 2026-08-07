@@ -5,13 +5,18 @@ import { MessageBundle } from "src/infra/Message";
 import { InstanceIdImpl } from "src/store/impl/InstanceIdImpl";
 import { InstanceParentHolder } from "src/store/modules/InstanceParentHolder";
 import { TIANYU_STORE_INSTANCE_BASE_ENTITY_STORE_TYPE } from "src/types/Defs";
+import { IStoreSystemInstanceMap } from "src/types/Store";
 
 describe("aitianyu-cn.node-module.tianyu-store.store.modules.InstanceParentHolder", () => {
     const holder = new InstanceParentHolder();
+    const instanceMap: IStoreSystemInstanceMap = {
+        parentMap: {},
+        childrenMap: {},
+    };
 
     beforeEach(() => {
-        holder["childrenMap"].clear();
-        holder["parentMap"].clear();
+        instanceMap.childrenMap = {};
+        instanceMap.parentMap = {};
         holder.discardChanges();
     });
 
@@ -22,11 +27,11 @@ describe("aitianyu-cn.node-module.tianyu-store.store.modules.InstanceParentHolde
                 { storeType: "store", entityId: "instance2" },
             ]);
 
-            holder.createInstance(instanceId);
+            holder.createInstance(instanceId, instanceMap);
 
-            expect(holder["childrenMap"].has(instanceId.toString()));
+            expect(instanceMap.childrenMap[instanceId.toString()]).toBeDefined();
 
-            const parent = holder["parentMap"].get(instanceId.toString());
+            const parent = instanceMap.parentMap[instanceId.toString()];
             expect(parent).toBeNull();
         });
 
@@ -38,7 +43,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.modules.InstanceParentHolde
             ]);
 
             expect(() => {
-                holder.createInstance(instanceId);
+                holder.createInstance(instanceId, instanceMap);
             }).toThrow(MessageBundle.getText("CREATE_INSTANCE_PARENT_NOT_INIT", instanceId.toString()));
         });
 
@@ -48,15 +53,15 @@ describe("aitianyu-cn.node-module.tianyu-store.store.modules.InstanceParentHolde
                 { storeType: "store", entityId: "instance2" },
             ]);
 
-            holder.createInstance(instanceId);
-            expect(holder["childrenMap"].has(instanceId.toString())).toBeTruthy();
-            expect(holder["parentMap"].get(instanceId.toString())).toBeNull();
+            holder.createInstance(instanceId, instanceMap);
+            expect(instanceMap.childrenMap[instanceId.toString()]).toBeDefined();
+            expect(instanceMap.parentMap[instanceId.toString()]).toBeNull();
 
             const childInstance = generateInstanceId(instanceId, "excel");
-            holder.createInstance(childInstance);
-            expect(holder["childrenMap"].has(childInstance.toString()));
-            expect(holder["parentMap"].get(childInstance.toString())).toEqual(instanceId.toString());
-            expect(holder["childrenMap"].get(instanceId.toString())?.includes(childInstance.toString())).toBeTruthy();
+            holder.createInstance(childInstance, instanceMap);
+            expect(instanceMap.childrenMap[childInstance.toString()]).toBeDefined();
+            expect(instanceMap.parentMap[childInstance.toString()]).toEqual(instanceId.toString());
+            expect(instanceMap.childrenMap[instanceId.toString()]?.includes(childInstance.toString())).toBeTruthy();
         });
     });
 
@@ -77,20 +82,20 @@ describe("aitianyu-cn.node-module.tianyu-store.store.modules.InstanceParentHolde
         const leaf23 = generateInstanceId(child2, "cell");
         const leaf24 = generateInstanceId(child2, "cell");
         beforeEach(() => {
-            holder.createInstance(instanceId);
-            holder.createInstance(child1);
-            holder.createInstance(child2);
-            holder.createInstance(leaf11);
-            holder.createInstance(leaf12);
-            holder.createInstance(leaf13);
-            holder.createInstance(leaf21);
-            holder.createInstance(leaf22);
-            holder.createInstance(leaf23);
-            holder.createInstance(leaf24);
+            holder.createInstance(instanceId, instanceMap);
+            holder.createInstance(child1, instanceMap);
+            holder.createInstance(child2, instanceMap);
+            holder.createInstance(leaf11, instanceMap);
+            holder.createInstance(leaf12, instanceMap);
+            holder.createInstance(leaf13, instanceMap);
+            holder.createInstance(leaf21, instanceMap);
+            holder.createInstance(leaf22, instanceMap);
+            holder.createInstance(leaf23, instanceMap);
+            holder.createInstance(leaf24, instanceMap);
         });
 
         it("remove parent", () => {
-            const removed = holder.removeInstance(child2.toString());
+            const removed = holder.removeInstance(child2.toString(), instanceMap);
             expect(removed.includes(child2.toString())).toBeTruthy();
             expect(removed.includes(leaf21.toString())).toBeTruthy();
             expect(removed.includes(leaf22.toString())).toBeTruthy();
@@ -119,29 +124,29 @@ describe("aitianyu-cn.node-module.tianyu-store.store.modules.InstanceParentHolde
         const leaf23 = generateInstanceId(child2, "cell");
         const leaf24 = generateInstanceId(child2, "cell");
         beforeEach(() => {
-            holder.createInstance(instanceId);
-            holder.createInstance(child1);
-            holder.createInstance(child2);
-            holder.createInstance(leaf11);
-            holder.createInstance(leaf12);
-            holder.createInstance(leaf13);
-            holder.createInstance(leaf21);
-            holder.createInstance(leaf22);
-            holder.createInstance(leaf23);
-            holder.createInstance(leaf24);
+            holder.createInstance(instanceId, instanceMap);
+            holder.createInstance(child1, instanceMap);
+            holder.createInstance(child2, instanceMap);
+            holder.createInstance(leaf11, instanceMap);
+            holder.createInstance(leaf12, instanceMap);
+            holder.createInstance(leaf13, instanceMap);
+            holder.createInstance(leaf21, instanceMap);
+            holder.createInstance(leaf22, instanceMap);
+            holder.createInstance(leaf23, instanceMap);
+            holder.createInstance(leaf24, instanceMap);
         });
 
         it("remove parent", () => {
-            holder.removeInstance(child2.toString());
-            holder.applyChanges();
+            holder.removeInstance(child2.toString(), instanceMap);
+            holder.applyChanges(instanceMap);
 
-            expect(holder["parentMap"].get(child2.toString())).toBeUndefined();
-            expect(holder["parentMap"].get(leaf21.toString())).toBeUndefined();
-            expect(holder["parentMap"].get(leaf22.toString())).toBeUndefined();
-            expect(holder["parentMap"].get(leaf23.toString())).toBeUndefined();
-            expect(holder["parentMap"].get(leaf24.toString())).toBeUndefined();
+            expect(instanceMap.parentMap[child2.toString()]).toBeUndefined();
+            expect(instanceMap.parentMap[leaf21.toString()]).toBeUndefined();
+            expect(instanceMap.parentMap[leaf22.toString()]).toBeUndefined();
+            expect(instanceMap.parentMap[leaf23.toString()]).toBeUndefined();
+            expect(instanceMap.parentMap[leaf24.toString()]).toBeUndefined();
 
-            const children = holder["childrenMap"].get(instanceId.toString());
+            const children = instanceMap.childrenMap[instanceId.toString()];
             expect(children).toBeDefined();
             expect(children).toEqual([child1.toString()]);
         });

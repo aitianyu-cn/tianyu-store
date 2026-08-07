@@ -42,7 +42,7 @@ export interface ITransaction {
      *
      * @returns return operation list
      */
-    getDispatched(): TransactionOperationRecord<IInstanceAction>[];
+    getDispatched(): TransactionOperationRecord<IInstanceAction<any>>[];
     /** To clean current dispatch actions history */
     cleanDispatch(): void;
 
@@ -67,7 +67,7 @@ export interface ITransaction {
 
 /** this is for internal using */
 export interface ITransactionInternal extends ITransaction {
-    dispatched(actions: IInstanceAction[]): TransactionOperationRecord<IInstanceAction>;
+    dispatched(actions: IInstanceAction<any>[]): TransactionOperationRecord<IInstanceAction<any>>;
     selected(selector: IInstanceSelector<any>): TransactionOperationRecord<IInstanceSelector<any>>;
     error(message: string | Error, type: TransactionType): TransactionErrorRecord;
 }

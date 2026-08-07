@@ -9,10 +9,10 @@ import { IInstanceSelector } from "./Selector";
  */
 export interface StoreEventTriggerCallback<SELECTOR_RESULT> {
     /**
-     * @param newState the new state from selector
      * @param oldState the pre-state from selector
+     * @param newState the new state from selector
      */
-    (newState: SELECTOR_RESULT | undefined, oldState: SELECTOR_RESULT | undefined): void;
+    (oldState: SELECTOR_RESULT | undefined, newState: SELECTOR_RESULT | undefined): void;
 }
 
 /**

@@ -1,7 +1,7 @@
 /** @format */
 
 import { IterableType } from "src/types/Model";
-import { IStoreInstanceCreateConfig } from "src/types/Store";
+import { IStoreInstanceSystemState } from "src/types/Store";
 
 export const STORE_STATE_SYSTEM = "tianyu-store";
 export const STORE_STATE_INSTANCE = "instances";
@@ -17,6 +17,6 @@ export interface IStoreInstance {
 }
 
 export interface IStoreState extends IterableType {
-    [STORE_STATE_SYSTEM]: IStoreInstanceCreateConfig;
+    [STORE_STATE_SYSTEM]: IStoreInstanceSystemState;
     [STORE_STATE_INSTANCE]: IStoreInstance;
 }

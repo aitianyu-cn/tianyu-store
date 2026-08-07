@@ -5,18 +5,24 @@ import { generateInstanceId } from "src/InstanceId";
 import { generateNewStoreInstance } from "src/Store";
 import { MessageBundle } from "src/infra/Message";
 import { StoreInstanceImpl } from "src/store/impl/StoreInstanceImpl";
-import { DifferenceChangeType, STORE_STATE_EXTERNAL_REDOUNDO_STACK } from "src/store/storage/interface/RedoUndoStack";
+import { STORE_STATE_EXTERNAL_REDOUNDO_STACK } from "src/store/storage/interface/RedoUndoStack";
 import { IStoreState, STORE_STATE_INSTANCE, STORE_STATE_SYSTEM } from "src/store/storage/interface/StoreState";
 import { ActionType, IInstanceAction } from "src/types/Action";
 import { IExternalObjectRegister } from "src/types/ExternalObject";
-import { InstanceId } from "src/types/InstanceId";
+import { DifferenceChangeType } from "src/types/RedoUndoStack";
 
 describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreInstanceImpl", () => {
     const basicInstanceId = generateNewStoreInstance();
     const defaultInstance = generateInstanceId(basicInstanceId, "test", "test_instance");
 
     const storeState: IStoreState = {
-        [STORE_STATE_SYSTEM]: { redoUndo: true },
+        [STORE_STATE_SYSTEM]: {
+            config: { redoUndo: true },
+            instanceMap: {
+                parentMap: {},
+                childrenMap: {},
+            },
+        },
         [STORE_STATE_INSTANCE]: {
             test: {
                 [defaultInstance.toString()]: {
@@ -170,7 +176,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreInstanceImpl", ()
 
         it("push change", () => {
             const instanceId = generateInstanceId(basicInstanceId, "test", guid());
-            const action: IInstanceAction = {
+            const action: IInstanceAction<any> = {
                 id: "",
                 action: "",
                 storeType: "test",
@@ -199,7 +205,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreInstanceImpl", ()
 
         it("push delete", () => {
             const instanceId = generateInstanceId(basicInstanceId, "test", guid());
-            const action: IInstanceAction = {
+            const action: IInstanceAction<any> = {
                 id: "",
                 action: "",
                 storeType: "test",
@@ -227,7 +233,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreInstanceImpl", ()
 
         it("push create", () => {
             const instanceId = generateInstanceId(basicInstanceId, "test", guid());
-            const action: IInstanceAction = {
+            const action: IInstanceAction<any> = {
                 id: "",
                 action: "",
                 storeType: "test",
@@ -258,7 +264,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreInstanceImpl", ()
 
         it("push change with not redo undo", () => {
             const instanceId = generateInstanceId(basicInstanceId, "test", guid());
-            const action: IInstanceAction = {
+            const action: IInstanceAction<any> = {
                 id: "",
                 action: "",
                 storeType: "test",
@@ -283,7 +289,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreInstanceImpl", ()
 
         it("push change with view action", () => {
             const instanceId = generateInstanceId(basicInstanceId, "test", guid());
-            const action: IInstanceAction = {
+            const action: IInstanceAction<any> = {
                 id: "",
                 action: "",
                 storeType: "test",
@@ -308,7 +314,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreInstanceImpl", ()
 
         it("push change with redo", () => {
             const instanceId = generateInstanceId(basicInstanceId, "test", guid());
-            const action: IInstanceAction = {
+            const action: IInstanceAction<any> = {
                 id: "",
                 action: "",
                 storeType: "test",
@@ -332,7 +338,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreInstanceImpl", ()
 
         it("push change with undo", () => {
             const instanceId = generateInstanceId(basicInstanceId, "test", guid());
-            const action: IInstanceAction = {
+            const action: IInstanceAction<any> = {
                 id: "",
                 action: "",
                 storeType: "test",
@@ -374,7 +380,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreInstanceImpl", ()
         });
 
         it("apply changes with changed", () => {
-            const action: IInstanceAction = {
+            const action: IInstanceAction<any> = {
                 id: "",
                 action: "",
                 storeType: "test",
@@ -397,7 +403,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.impl.StoreInstanceImpl", ()
         });
 
         it("apply changes with changed - not redo undo", () => {
-            const action: IInstanceAction = {
+            const action: IInstanceAction<any> = {
                 id: "",
                 action: "",
                 storeType: "test",

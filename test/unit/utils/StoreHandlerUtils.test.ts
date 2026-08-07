@@ -4,7 +4,13 @@ import { generateInstanceId } from "src/InstanceId";
 import { ActionType, IInstanceAction } from "src/types/Action";
 import { IInstanceSelector } from "src/types/Selector";
 import { StoreHandleType } from "src/types/StoreHandler";
-import { doAction, doSelector, doReadExternal, doActionWithActioName } from "src/utils/StoreHandlerUtils";
+import {
+    doAction,
+    doSelector,
+    doReadExternal,
+    doActionWithActioName,
+    doSelectorWithThrow,
+} from "src/utils/StoreHandlerUtils";
 
 describe("aitianyu-cn.node-module.tianyu-store.utils.StoreHandlerUtils", () => {
     describe("doActionWithActioName", () => {
@@ -23,7 +29,7 @@ describe("aitianyu-cn.node-module.tianyu-store.utils.StoreHandlerUtils", () => {
 
     describe("doAction", () => {
         it("-", () => {
-            const action: IInstanceAction = {
+            const action: IInstanceAction<any> = {
                 id: "",
                 action: "",
                 storeType: "",
@@ -63,6 +69,30 @@ describe("aitianyu-cn.node-module.tianyu-store.utils.StoreHandlerUtils", () => {
             const finalValue = result.value;
             expect(finalValue.type).toBe(StoreHandleType.SELECTOR);
             expect(finalValue.selector).toEqual(selector);
+            expect(finalValue.shouldThrow).toBeFalsy();
+        });
+    });
+
+    describe("doSelectorWithThrow", () => {
+        it("-", () => {
+            const selector: IInstanceSelector<any> = {
+                instanceId: generateInstanceId("", ""),
+                id: "",
+                selector: "",
+                storeType: "",
+                params: undefined,
+            };
+
+            const iterator = doSelectorWithThrow(selector);
+            let result = iterator.next();
+            if (!result.done) {
+                result = iterator.next(result.value);
+            }
+
+            const finalValue = result.value;
+            expect(finalValue.type).toBe(StoreHandleType.SELECTOR);
+            expect(finalValue.selector).toEqual(selector);
+            expect(finalValue.shouldThrow).toBeTruthy();
         });
     });
 

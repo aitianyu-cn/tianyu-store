@@ -1,6 +1,7 @@
 /** @format */
 
 import { IterableType } from "src/types/Model";
+import { IDifferences } from "src/types/RedoUndoStack";
 
 export const STORE_STATE_EXTERNAL_REDOUNDO_STACK = "tianyu-store-entity-external-redo_undo-stack";
 
@@ -15,22 +16,6 @@ export interface IDifferencesInfo extends IterableType {
     deleted?: true;
     /** does the change be adding */
     added?: true;
-}
-
-export enum DifferenceChangeType {
-    Change,
-    Create,
-    Delete,
-}
-
-export interface IDifferences extends IterableType {
-    [storeType: string]: {
-        [instanceId: string]: {
-            old: any;
-            new: any;
-            type: DifferenceChangeType;
-        };
-    };
 }
 
 export interface IRedoUndoStack {

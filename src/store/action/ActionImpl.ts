@@ -19,7 +19,7 @@ import {
 import { ActionHandlerFunction } from "src/types/ActionHandler";
 import { ExternalOperatorFunction } from "src/types/ExternalObject";
 import { InstanceId } from "src/types/InstanceId";
-import { IterableType, ReturnableType, OperatorInfoType } from "src/types/Model";
+import { IterableType, OperatorInfoType } from "src/types/Model";
 import { ReducerFunction } from "src/types/Reducer";
 import { actionBaseImpl } from "./ActionBaseImpl";
 
@@ -61,7 +61,11 @@ export function viewActionImpl<STATE extends IterableType, PARAMETER_TYPE, RETUR
     actionType?: ActionType,
 ): ViewActionProvider<STATE, PARAMETER_TYPE, RETURN_TYPE> {
     const actionInstanceCaller = <ViewActionProvider<STATE, PARAMETER_TYPE, RETURN_TYPE>>(
-        function (instanceId: InstanceId, params: PARAMETER_TYPE, viewInstanceId: InstanceId): IInstanceViewAction {
+        function (
+            instanceId: InstanceId,
+            params: PARAMETER_TYPE,
+            viewInstanceId: InstanceId,
+        ): IInstanceViewAction<PARAMETER_TYPE> {
             return {
                 id: actionInstanceCaller.actionId,
                 action: actionInstanceCaller.info.fullName,

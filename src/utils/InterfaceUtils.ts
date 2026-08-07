@@ -18,6 +18,19 @@ export function registerExpose(element: ITianyuStoreInterfaceImplementation, sto
     _registerExposeInternal(element, storeType || "", storeType || "");
 }
 
+/**
+ * Function to register the store template interface to generate operator information
+ *
+ * @param element the store template interface implementation element
+ *
+ * INFORMATION:
+ * THIS FUNCTION WILL REGISTER A COMMON INTERFACE FOR STORE THAT THE INTERFACE CAN BE RUN IN MULTIPLE
+ * INSTANCES WHICH ARE IMPLEMENTED THE INTERFACE
+ */
+export function registerTemplate(element: ITianyuStoreInterfaceImplementation): void {
+    _registerExposeInternal(element, "", true);
+}
+
 /** this is for internal using */
 export function registerInterface(
     element: ITianyuStoreInterfaceImplementation,
@@ -27,7 +40,7 @@ export function registerInterface(
 }
 
 function checkSelector(obj: any): boolean {
-    return typeof obj !== "undefined" && !!(obj as ISelectorProviderBase<any>)?.selector;
+    return typeof obj !== "undefined" && !!(obj as ISelectorProviderBase<any, any>)?.selector;
 }
 
 function checkAction(obj: any): boolean {
@@ -37,7 +50,7 @@ function checkAction(obj: any): boolean {
 function _registerExposeInternal(
     element: ITianyuStoreInterfaceImplementation,
     path: string,
-    storeType: string,
+    storeTypeOrTemplate: string | boolean,
 ): ITianyuStoreInterfaceList {
     let interfaceList: ITianyuStoreInterfaceList = {};
     for (const key of Object.keys(element)) {
@@ -51,11 +64,12 @@ function _registerExposeInternal(
         const isAction = checkAction(dir);
         if (isSelector || isAction) {
             // this is an action or selector
-            const operator = isSelector ? (dir as ISelectorProviderBase<any>) : (dir as IActionProviderBase<any>);
+            const operator = isSelector ? (dir as ISelectorProviderBase<any, any>) : (dir as IActionProviderBase<any>);
             operator.info.name = key;
             operator.info.path = path;
             operator.info.fullName = dirPath;
-            operator.info.storeType = storeType;
+            operator.info.storeType = typeof storeTypeOrTemplate === "string" ? storeTypeOrTemplate : "";
+            operator.info.template = typeof storeTypeOrTemplate === "boolean" ? storeTypeOrTemplate : false;
 
             // insert a new operator
             interfaceList[dirPath] = operator;
@@ -64,7 +78,7 @@ function _registerExposeInternal(
             // to merge two object
             interfaceList = {
                 ...interfaceList,
-                ..._registerExposeInternal(dir as ITianyuStoreInterfaceImplementation, dirPath, storeType),
+                ..._registerExposeInternal(dir as ITianyuStoreInterfaceImplementation, dirPath, storeTypeOrTemplate),
             };
         }
     }

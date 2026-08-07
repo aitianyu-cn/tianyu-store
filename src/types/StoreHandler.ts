@@ -28,7 +28,7 @@ export interface StoreActionHandle {
     /** indicates action handle type */
     type: StoreHandleType.ACTION;
     /** provides action instance */
-    action: IInstanceAction;
+    action: IInstanceAction<any>;
 }
 
 /**
@@ -40,6 +40,8 @@ export interface StoreSelectorHandle<RESULT> {
     type: StoreHandleType.SELECTOR;
     /** provides selector instance */
     selector: IInstanceSelector<RESULT>;
+    /** flag indicates the select should throw an error when receiving missing type */
+    shouldThrow?: boolean;
 }
 
 /**

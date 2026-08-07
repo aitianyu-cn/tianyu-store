@@ -9,15 +9,12 @@ import { InstanceId } from "src/types/InstanceId";
 import { IStoreExecution } from "src/types/Store";
 import { ExternalRegister } from "../modules/ExternalRegister";
 import { RedoUndoStackImpl } from "../storage/RedoUndoStackImpl";
-import {
-    DifferenceChangeType,
-    STORE_STATE_EXTERNAL_REDOUNDO_STACK,
-    IDifferences,
-    IRedoUndoStack,
-} from "../storage/interface/RedoUndoStack";
+import { STORE_STATE_EXTERNAL_REDOUNDO_STACK, IRedoUndoStack } from "../storage/interface/RedoUndoStack";
 import { IStoreState, STORE_STATE_SYSTEM, STORE_STATE_INSTANCE } from "../storage/interface/StoreState";
 import { InstanceIdImpl } from "./InstanceIdImpl";
 import { InstanceParentHolder } from "../modules/InstanceParentHolder";
+import { DifferenceChangeType, IDifferences } from "src/types/RedoUndoStack";
+import { isChangesEmpty } from "src/utils/ObjectUtils";
 
 interface IStoreChangeInstance {
     [storeType: string]: {
@@ -40,10 +37,12 @@ export class StoreInstanceImpl implements IStoreExecution {
     private instanceId: InstanceId;
 
     private changeCache: IStoreChangeInstance;
+    private diffCache: IDifferences;
 
     public constructor(state: IStoreState, instanceId: InstanceId) {
         this.storeState = state;
         this.changeCache = {};
+        this.diffCache = {};
         this.instanceId = instanceId;
 
         this.externalObjectMap = new Map<string, IExternalObjectRegister>();
@@ -51,7 +50,7 @@ export class StoreInstanceImpl implements IStoreExecution {
 
         // to init the root external register
         const externalRegister = new ExternalRegister();
-        if (this.storeState[STORE_STATE_SYSTEM].redoUndo) {
+        if (this.storeState[STORE_STATE_SYSTEM].config.redoUndo) {
             externalRegister.add(STORE_STATE_EXTERNAL_REDOUNDO_STACK, new RedoUndoStackImpl());
         }
         this.externalObjectMap.set(instanceId.toString(), externalRegister);
@@ -141,48 +140,56 @@ export class StoreInstanceImpl implements IStoreExecution {
         return ins;
     }
 
-    applyChanges(): void {
-        const changes = this.changeCache;
-        this.changeCache = {};
-
+    applyChanges(): IDifferences {
         let redoUndoSupport = true;
         let recordRedoUndo = true;
-        const diff: IDifferences = {};
-        for (const storyType of Object.keys(changes)) {
-            const instances = changes[storyType];
-            for (const insId of Object.keys(instances)) {
-                const changeItem = instances[insId];
-                const oldState = this.storeState[STORE_STATE_INSTANCE][storyType]?.[insId];
-                if (ObjectHelper.compareObjects(oldState, changeItem.state) === "different") {
-                    // ensure the state is changed
-                    if (!diff[storyType]) {
-                        diff[storyType] = {};
+        const diff: IDifferences = this.diffCache;
+        this.diffCache = {};
+
+        if (isChangesEmpty(diff)) {
+            const changes = this.changeCache;
+            this.changeCache = {};
+            for (const storyType of Object.keys(changes)) {
+                const instances = changes[storyType];
+                for (const insId of Object.keys(instances)) {
+                    const changeItem = instances[insId];
+                    const oldState = this.storeState[STORE_STATE_INSTANCE][storyType]?.[insId];
+                    if (ObjectHelper.compareObjects(oldState, changeItem.state) === "different") {
+                        // ensure the state is changed
+                        if (!diff[storyType]) {
+                            diff[storyType] = {};
+                        }
+                        diff[storyType][insId] = {
+                            new: changeItem.state,
+                            old: oldState,
+                            type: changeItem.type,
+                        };
                     }
-                    diff[storyType][insId] = {
-                        new: changeItem.state,
-                        old: oldState,
-                        type: changeItem.type,
-                    };
+
+                    if (changeItem.type === DifferenceChangeType.Create) {
+                        this.parentChildHolder.createInstance(
+                            new InstanceIdImpl(insId),
+                            this.storeState[STORE_STATE_SYSTEM].instanceMap,
+                        );
+                    }
+
+                    // this is for state redo/undo checking
+                    // when there is a view action
+                    // should clean all redo/undo stack due to the state is could not be navigated
+                    redoUndoSupport = redoUndoSupport && changeItem.redoUndo;
+
+                    // this is for state redo/undo recording checking
+                    // when there is a redo/undo action
+                    // should not to record the state change again
+                    recordRedoUndo = recordRedoUndo && changeItem.record;
                 }
-
-                if (changeItem.type === DifferenceChangeType.Create) {
-                    this.parentChildHolder.createInstance(new InstanceIdImpl(insId));
-                }
-
-                // this is for state redo/undo checking
-                // when there is a view action
-                // should clean all redo/undo stack due to the state is could not be navigated
-                redoUndoSupport = redoUndoSupport && changeItem.redoUndo;
-
-                // this is for state redo/undo recording checking
-                // when there is a redo/undo action
-                // should not to record the state change again
-                recordRedoUndo = recordRedoUndo && changeItem.record;
             }
+        } else {
+            recordRedoUndo = false;
         }
 
         this.storeState = mergeDiff(this.storeState, diff);
-        this.parentChildHolder.applyChanges();
+        this.parentChildHolder.applyChanges(this.storeState[STORE_STATE_SYSTEM].instanceMap);
 
         const redoUndoStack = this.externalObjectMap
             .get(this.instanceId.toString())
@@ -192,6 +199,8 @@ export class StoreInstanceImpl implements IStoreExecution {
         } else {
             redoUndoStack?.resetRedoUndo();
         }
+
+        return diff;
     }
     discardChanges(): void {
         this.changeCache = {};
@@ -230,7 +239,10 @@ export class StoreInstanceImpl implements IStoreExecution {
 
         if (actionType === ActionType.DESTROY) {
             // for destroy instance, to destroy its children
-            const instances = this.parentChildHolder.removeInstance(instanceId);
+            const instances = this.parentChildHolder.removeInstance(
+                instanceId,
+                this.storeState[STORE_STATE_SYSTEM].instanceMap,
+            );
             for (const insId of instances) {
                 const ins = new InstanceIdImpl(insId);
                 const storeType = ins.storeType;
@@ -244,7 +256,11 @@ export class StoreInstanceImpl implements IStoreExecution {
         }
     }
 
-    validateActionInstance(action: IInstanceAction): void {
+    pushDiffChange(diff: IDifferences): void {
+        this.diffCache = diff;
+    }
+
+    validateActionInstance(action: IInstanceAction<any>): void {
         //
     }
 }

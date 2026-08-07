@@ -32,7 +32,7 @@ describe("aitianyu-cn.node-module.tianyu-store.store.modules.Transaction", () =>
 
         describe("TransactionManager", () => {
             it("dispatched", () => {
-                const actionInstance: IInstanceAction = {
+                const actionInstance: IInstanceAction<any> = {
                     id: guid(),
                     action: "test_action",
                     storeType: "test",

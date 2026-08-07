@@ -1,3 +1,37 @@
 {
-    "TIANYU_STORE_CURRENT_LANGUAGE": "en_us"
+    "TIANYU_STORE_CURRENT_LANGUAGE": "en_us",
+    "SELECTOR_VIRTUAL_NO_RANNABLE": "[Tianyu Store] virtual selector could not be executed.",
+    "ACTION_VIRTUAL_NO_HANDLER": "[Tianyu Store] handler of virtual action should not be executed.",
+    "ACTION_VIRTUAL_NO_REDUCER": "[Tianyu Store] could not get state from virtual action reducer.",
+    "ACTION_VIRTUAL_NO_EXTERNAL_OPERATOR": "[Tianyu Store] external object entry is not indicated in virtual action.",
+    "DISPATCHING_HANDLER_WITH_UNKNOWN_RESULT": "[Tianyu Store] action handler dispathing cause an unknown error.",
+    "GET_NEW_STATE_LOST_OBJECT": "[Tianyu Store] object {0} is not found from new state.",
+    "DO_SELECTING_FAILED": "[Tianyu Store] store selector exeuction failed.",
+
+    "SELECTOR_NOT_SUPPORTED_FOR_LISTEN_OR_SUBSCRIBE": "[Tianyu Store] selector type '{0}' is not supported in store listener or subscribe, please use selector excludes 'restrict selector' and 'mix selector'.",
+
+    "INSTANCE_ID_NOT_VALID": "[Tianyu Store] store instance id {0} is not valid.",
+    "CREATE_INSTANCE_PARENT_NOT_INIT": "[Tianyu Store] store instance id {0} is not valid since trying to create a child instance under an uninited instance.",
+
+    "STORE_ACTION_NOT_FOUND": "[Tianyu Store] could not execute action, due to action {0} is not found.",
+    "STORE_SELECTOR_NOT_FOUND": "[Tianyu Store] could not execute selector, due to selector {0} is not found.",
+    "STORE_CREATE_ENTITY_DUP": "[Tianyu Store] store instance {0} - {1} has been created before. Could not to create again.",
+    "STORE_SHOULD_NOT_REGISTER_SYSTEM_ENTITY": "[Tianyu Store] store core issue: could not to register system store entity type.",
+    "STORE_ENTITY_NOT_EXIST": "[Tianyu Store] try to access entity {0} failed, it might not be inited or is deleted already.",
+    "STORE_EVENT_LISTENER_TRIGGER_FAILED": "[Tianyu Store] fire a listener (listener id: {1}, selector name: \"{2}\") failed with error: {0}.",
+    "STORE_EVENT_SUBSCRIBE_TRIGGER_FAILED": "[Tianyu Store] fire a listener (subscribe id: {1}, selector name: \"{2}\") failed with error: {0}.",
+
+    "STORE_INSTANCE_USE_DELETED": "[Tianyu Store] access instance from store type - {0} & instance id {1}, is deleted.",
+    "STORE_INSTANCE_EXTRERNAL_MANAGER_NOT_FOUND": "[Tianyu Store] could not find the external object manager from instance {0}.",
+    "STORE_INSTANCE_NOT_EXIST": "[Tianyu Store] store instance {0} does not exist.",
+
+    "DISPATCHING_ACTIONS_DIFFERENT_ANCESTOR": "[Tianyu Store] dispatching actions with different ancestor, first instance is under entity {0} and another instance is under {1}.",
+    "DISPATCHING_REDO_UNDO_NOT_ATOM": "[Tianyu Store] action {0} operation should be automiced.",
+    "DISPATCHING_SYSTEM_LIFECYCLE_NOT_ATOM": "[Tianyu Store] store entity operation: {0} should be automiced.",
+    "DISPATCHING_ACTION_INSTANCE_NOT_MATCH": "[Tianyu Store] could not support different store type instance execution, using instance \"{1}\" store type to execute \"{2}\" action belongs to \"{0}\" store type.",
+    "DISPATCHING_INSTANCE_ID_NOT_VALID": "[Tianyu Store] Action {0} could not be executed by using the invalid instance id {1}.",
+
+    "RUNNING_STORE_TYPE_INSTANCE_NOT_MATCH": "[Tianyu Store] execute on instance ({0}) failed, due to store entity type could not found.",
+
+    "TRANSACTION_ERROR_RECORDING_UNKNOWN_ERROR": "[Tianyu Store] an invalid instance id {1} is used to exuecute action: {0}."
 }

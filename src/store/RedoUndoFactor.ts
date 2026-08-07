@@ -41,7 +41,7 @@ const GetUndoAvailableSelector = SelectorFactor.makeSelector(
 );
 
 const GetRedoUndoEnabledSelector = SelectorFactor.makeSelector(function (state: IStoreState): boolean {
-    return Boolean(state[STORE_STATE_SYSTEM].redoUndo);
+    return Boolean(state[STORE_STATE_SYSTEM].config.redoUndo);
 });
 
 export const TianyuStoreRedoUndoInterface = {
@@ -49,10 +49,14 @@ export const TianyuStoreRedoUndoInterface = {
         redoAction: RedoActionCreator,
         undoAction: UndoActionCreator,
 
+        /** Get current redo action is valid */
         getRedoAvailable: GetRedoAvailableSelector,
+        /** Get current undo action is valid */
         getUndoAvailable: GetUndoAvailableSelector,
+        /** Get redo/undo operation is enabled in current store entity */
         getRedoUndoEnabled: GetRedoUndoEnabledSelector,
 
+        /** Clean all redo/undo stack in current store entity */
         cleanStackAction: CleanRedoUndoStackAction,
     },
 };

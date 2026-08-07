@@ -15,6 +15,35 @@ export const getConnectToken = SelectorFactor.makeSelector(function (state: ITes
     return state.token;
 });
 
-export const getUserOperations = SelectorFactor.makeSelector(function (state: ITestUserState): string[] {
-    return state.operations;
+export const getUserSpecifiedOperations = SelectorFactor.makeParameterSelector(function (
+    state: ITestUserState,
+    commonOp: string[],
+): string[] {
+    return [...state.operations, ...commonOp];
+});
+
+export const getCommonOperations = SelectorFactor.makeConstantSelector(function () {
+    return ["Theme", "Language"];
+});
+
+export const getUserOperations = SelectorFactor.makeRestrictSelector(getCommonOperations, getUserSpecifiedOperations);
+
+export const getUserStatus = SelectorFactor.makeMixingSelector(
+    getUser,
+    isUserLogon,
+    getConnectToken,
+    (user, logon, token) => {
+        return {
+            user,
+            logon,
+            token,
+        };
+    },
+);
+
+export const getUserInfo = SelectorFactor.makeMixingSelector(getUserStatus, getUserOperations, (status, operate) => {
+    return {
+        ...status,
+        operations: operate,
+    };
 });

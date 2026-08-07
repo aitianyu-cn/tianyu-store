@@ -71,6 +71,8 @@ export interface IOperatorInfo {
     fullName: string;
     /** Store Operator Type */
     type: OperatorInfoType;
+    /** Indicates the store operator is a template or fact */
+    template?: boolean;
 }
 
 /**

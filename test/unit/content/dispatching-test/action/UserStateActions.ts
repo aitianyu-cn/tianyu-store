@@ -14,9 +14,10 @@ import {
 } from "./creator/UserStateActionCreator";
 import { guid } from "@aitianyu.cn/types";
 import { getUser, isUserLogon } from "../selector/UserStateSelector";
-import { doAction, doReadExternal, doSelector } from "src/utils/StoreHandlerUtils";
+import { doAction, doReadExternal, doSelector, doSelectorWithThrow } from "src/utils/StoreHandlerUtils";
 import { getNewStateBatch } from "src/utils/state-helper/GetNewStateBatch";
 import { getNewState } from "src/utils/state-helper/GetNewState";
+import { Missing } from "src/types/Model";
 
 export const CreateAction = CreateUserStateActioCreator.withReducer(function (state: ITestUserState) {
     return {
@@ -99,11 +100,11 @@ export const UserLogonAction = UserLogonActionCreator.withHandler(function* (act
 
 export const UserGetOptionAction = UserGetOptionActionCreator.withHandler(function* (action) {
     const isLogon = yield* doSelector(isUserLogon(action.instanceId));
-    if (!isLogon) {
+    if (isLogon instanceof Missing || !isLogon) {
         return [];
     }
 
-    const user = yield* doSelector(getUser(action.instanceId));
+    const user = yield* doSelectorWithThrow(getUser(action.instanceId));
     const options = yield* doReadExternal(function (register) {
         return register.get(USER_OPTIONS_EXTERNAL_OBJ);
     });

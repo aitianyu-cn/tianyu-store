@@ -1,5 +1,7 @@
 /**@format */
 
+import { IDifferences } from "src/types/RedoUndoStack";
+
 /**
  * try to parse a string into object
  *
@@ -12,4 +14,8 @@ export function parseJsonString(json: string): any {
     } catch {
         return undefined;
     }
+}
+
+export function isChangesEmpty(changes: IDifferences): boolean {
+    return Object.keys(changes).length === 0;
 }

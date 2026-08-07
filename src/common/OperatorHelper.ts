@@ -9,5 +9,6 @@ export function defaultInfoGenerator(type: OperatorInfoType): IOperatorInfo {
         path: "",
         name: "",
         fullName: "",
+        template: false,
     };
 }

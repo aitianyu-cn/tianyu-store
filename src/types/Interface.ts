@@ -31,7 +31,7 @@ export interface ITianyuStoreInterface<STATE extends IterableType> extends ITian
 export interface ITianyuStoreInterfaceImplementation<STATE extends IterableType = any> {
     [part: string]:
         | IActionProviderBase<STATE>
-        | ISelectorProviderBase<STATE>
+        | ISelectorProviderBase<STATE, any>
         | ITianyuStoreInterfaceImplementation
         | undefined;
 }
@@ -51,5 +51,5 @@ export interface ITianyuStoreInterfaceMap {
  * Define an operator list for all applied store interfaces in a store
  */
 export interface ITianyuStoreInterfaceList {
-    [operatorName: string]: IActionProviderBase<any> | ISelectorProviderBase<any>;
+    [operatorName: string]: IActionProviderBase<any> | ISelectorProviderBase<any, any>;
 }

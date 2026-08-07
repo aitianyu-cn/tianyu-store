@@ -6,7 +6,7 @@ import { createBatchAction } from "src/utils/BatchActionUtils";
 
 describe("aitianyu-cn.node-module.tianyu-store.utils.BatchActionUtils.test", () => {
     it("createBatchAction", () => {
-        const action1: IInstanceAction = {
+        const action1: IInstanceAction<any> = {
             id: "",
             action: "action1",
             storeType: "",
@@ -14,7 +14,7 @@ describe("aitianyu-cn.node-module.tianyu-store.utils.BatchActionUtils.test", () 
             params: undefined,
             actionType: ActionType.ACTION,
         };
-        const action2: IInstanceAction = {
+        const action2: IInstanceAction<any> = {
             id: "",
             action: "action2",
             storeType: "",
